@@ -1,0 +1,66 @@
+Definitionen zu den Randbedingungen
+
+- binäre Datei
+- eine einzelne Datei für MPI
+- jeder Randbedingung genau definiert
+
+
+
+Struktur (Anzahl der CPUs im Name[#CPU)):
+
+
+
+Version - INTEGER
+Dimension - INTEGER
+Number_of_Blocks - INTEGER
+<#CPU>
+  Start-Byte - INTEGER
+  End-Byte - INTEGER
+<#BLOCKS>
+  <#FACES>
+     conType - INTEGER
+     [Parameter - INTEGER/REAL] 
+  
+  
+#FACES hängt von Dimension ab (2,4,6)  
+    WEST_FACE          = 1
+    EAST_FACE          = 2
+    SOUTH_FACE         = 3
+    NORTH_FACE         = 4
+    BACK_FACE          = 5
+    FRONT_FACE         = 6
+
+conType (Randtypen):
+    BLOCKCON         >  0
+    BC_WALL          = -1
+    BC_INFLOW        = -2
+    BC_OUTFLOW       = -3
+    BC_SYMMERTIE     = -4
+
+Parameter:
+
+BLOCKCON:
+    ist der Zu Verbindende Block
+    conCPU - INTEGER
+    conFace - INTEGER
+    permutation - INTEGER
+
+BC_WALL:    
+    Wandtype - INTEGER
+    [Wandtemp - REAL if Wandtype == 1]
+    [Heatflux - REAL if Wandtype == 3]
+    [Wandtemp - REAL(NCELLS) if Wandtype == 4]
+    ! Es wird nicht eine einzelne Temperatur sondern eine Temperatur-Array übergeben
+    [Heatflux - REAL(NCELLS) if Wandtype == 5]
+    ! Es wird nicht eine einzelne Heatflux sondern ein Heatflux-Array übergeben
+    
+BC_INFLOW:
+    Inflowtype - INTEGER
+    
+Wandtype:    
+    isothermal_Wall  = 1
+    adiabatic_Wall   = 2
+    heatflux_Wall    = 3    
+var_isothermal_Wall  = 4
+var_heatflux_Wall    = 5
+    

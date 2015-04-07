@@ -1,0 +1,10 @@
+init.o: control.o calc_metrices.o
+read_bc.o: global.o control.o error_message.o
+global.o: types.o
+end_program.o: const.o write_screen.o
+input.o: global.o const.o control.o input_control.o read_grid.o read_bc.o write_screen.o
+read_grid.o: global.o control.o error_message.o
+main.o: const.o types.o write_screen.o input.o init.o end_program.o
+input_control.o: control.o
+error_message.o: const.o end_program.o
+calc_metrices.o: global.o const.o control.o

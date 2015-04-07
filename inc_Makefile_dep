@@ -1,0 +1,7 @@
+$(OBJECTS_DIR)/init.o: $(OBJECTS_DIR)/control.o $(OBJECTS_DIR)/calc_metrices.o
+$(OBJECTS_DIR)/read_bc.o: $(OBJECTS_DIR)/global.o $(OBJECTS_DIR)/error_message.o
+$(OBJECTS_DIR)/global.o: $(OBJECTS_DIR)/types.o
+$(OBJECTS_DIR)/input.o: $(OBJECTS_DIR)/global.o $(OBJECTS_DIR)/const.o $(OBJECTS_DIR)/read_grid.o $(OBJECTS_DIR)/read_bc.o $(OBJECTS_DIR)/write_screen.o
+$(OBJECTS_DIR)/read_grid.o: $(OBJECTS_DIR)/global.o $(OBJECTS_DIR)/error_message.o
+$(OBJECTS_DIR)/main.o: $(OBJECTS_DIR)/types.o $(OBJECTS_DIR)/write_screen.o $(OBJECTS_DIR)/input.o $(OBJECTS_DIR)/init.o
+$(OBJECTS_DIR)/calc_metrices.o: $(OBJECTS_DIR)/global.o $(OBJECTS_DIR)/const.o
