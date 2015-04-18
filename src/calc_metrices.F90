@@ -126,14 +126,15 @@ do b = 1,nBlock
          call error ("Angrenzende Bloecke noch nicht implementiert",__FILE__,__LINE__)      
       end if !conType < 0
    end do !f = 1,nFaces
-   do k = 1-n_BC_Cells, block(b)%nCell(3)+n_BC_Cells
+   !do k = 1-n_BC_Cells, block(b)%nCell(3)+n_BC_Cells
+    k = 1
       nlv(3) = k
       do j = 1-n_BC_Cells, block(b)%nCell(2)+n_BC_Cells
          nlv(2) = j
          do i = 1-n_BC_Cells, block(b)%nCell(1)+n_BC_Cells
             nlv(1) = i
-            do d1 = 1, Dimen
-               do d2 = 1,Dimen 
+            do d1 = 1, Dimen ! physikalische Dimensionen x,y,z
+               do d2 = 1,Dimen  ! Gitter dimensionen i,j,k eta xi phi
                   ndir = 0
                   ndir(d2) = 1
                   if (nlv(d2) == 1-n_BC_Cells) then
@@ -159,10 +160,7 @@ do b = 1,nBlock
                                    * block(b) % metric1(i,j,k,2,2) &
                                    - block(b) % metric1(i,j,k,1,2) &
                                    * block(b) % metric1(i,j,k,2,1)
-            write(*,*) block(b) % JacI(i,j,k),block(b) % metric1(i,j,k,1,1)&
-                                   , block(b) % metric1(i,j,k,2,2) &
-                                   , block(b) % metric1(i,j,k,1,2) &
-                                   , block(b) % metric1(i,j,k,2,1)
+
             block(b) % Jac(i,j,k) = 1.0E0_dp / block(b) % JacI(i,j,k)
             
             do d1 = 1, Dimen
@@ -177,7 +175,7 @@ do b = 1,nBlock
             
          end do !i = 1-n_BC_Cells, block(b)%nCell(1)+n_BC_Cells
       end do !j = 1-n_BC_Cells, block(b)%nCell(2)+n_BC_Cells
-   end do !k = 1-n_BC_Cells, block(b)%nCell(3)+n_BC_Cells
+!   end do !k = 1-n_BC_Cells, block(b)%nCell(3)+n_BC_Cells
 end do !b = 1,nBlock
 
 end subroutine calc_metrices

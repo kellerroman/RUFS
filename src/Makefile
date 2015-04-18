@@ -6,3 +6,6 @@ clean:
 
 dep:
 	@$(MAKE) -C ../ dep --no-print-directory
+
+tools:
+	@$(MAKE) -C ../ tools --no-print-directory

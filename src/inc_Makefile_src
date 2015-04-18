@@ -1,1 +1,1 @@
-_SOURCES+= const.F90 init.F90 read_bc.F90 global.F90 end_program.F90 input.F90 control.F90 read_grid.F90 main.F90 write_screen.F90 input_control.F90 error_message.F90 types.F90 calc_metrices.F90
+_SOURCES+= const.F90 init.F90 read_bc.F90 global.F90 end_program.F90 input.F90 control.F90 write_residual.F90 read_grid.F90 iter_control.F90 main.F90 write_screen.F90 write_solution.F90 input_control.F90 error_message.F90 types.F90 calc_metrices.F90 

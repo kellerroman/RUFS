@@ -2,7 +2,9 @@ module const
 implicit none
 public
 save
-integer, parameter :: dp = KIND(1.0D+0)
+integer, parameter :: dp = KIND(1.0D+0) ! DOUBLE PRECISION
+integer, parameter :: ip = KIND(1)      ! INTEGER PRECISION
+integer, parameter :: len_str_filename = 100
 
 integer, parameter ::  WEST_FACE          = 1
 integer, parameter ::  EAST_FACE          = 2
@@ -44,5 +46,43 @@ character ( len = 2 ), parameter :: BC_TYPE(4) = (/"Wa","If","Of","Sy"/)
 !<              -2: INFLOW
 !<              -3: OUTFLOW
 !<              -4: SYMMETRIE
+character ( len = 2 ), parameter :: marker_prefix = "$%"
+!character ( len = 4 ), parameter :: marker_suffix = "$"//CHAR(13)//CHAR(11)//CHAR (0) !!! MAKES THE SOL_FILE LITTLE READABLE IN ASCII (CAT)
+character ( len = 1 ), parameter :: marker_suffix = "$"
 
+integer, parameter :: io_marker_len = len(marker_prefix)+1+len(marker_suffix)
+
+character ( len = io_marker_len ), parameter :: io_marker_file_start           = marker_prefix//"f"//marker_suffix
+character ( len = io_marker_len ), parameter :: io_marker_header_start         = marker_prefix//"h"//marker_suffix
+character ( len = io_marker_len ), parameter :: io_marker_header_end           = marker_prefix//"H"//marker_suffix
+
+character ( len = io_marker_len ), parameter :: io_marker_solution_start       = marker_prefix//"s"//marker_suffix
+
+character ( len = io_marker_len ), parameter :: io_marker_solution_header_start     = marker_prefix//"i"//marker_suffix
+character ( len = io_marker_len ), parameter :: io_marker_solution_header_end       = marker_prefix//"I"//marker_suffix
+
+character ( len = io_marker_len ), parameter :: io_marker_solution_block_start     = marker_prefix//"b"//marker_suffix
+character ( len = io_marker_len ), parameter :: io_marker_solution_block_end       = marker_prefix//"B"//marker_suffix
+
+character ( len = io_marker_len ), parameter :: io_marker_solution_var_start     = marker_prefix//"v"//marker_suffix
+character ( len = io_marker_len ), parameter :: io_marker_solution_var_end       = marker_prefix//"V"//marker_suffix
+
+character ( len = io_marker_len ), parameter :: io_marker_solution_end         = marker_prefix//"S"//marker_suffix
+
+
+character ( len = io_marker_len ), parameter :: io_marker_file_end             = marker_prefix//"F"//marker_suffix
+
+integer, parameter               :: io_sol_version = 1
+
+integer, parameter               :: io_len_VarName = 20
+
+character ( len = io_len_Varname ), parameter :: VarName_Rho        = "Dichte"
+character ( len = io_len_Varname ), parameter :: VarName_Jac        = "Jacobi"
+character ( len = io_len_Varname ), parameter :: VarName_SwpX       = "Schwerpunkt X"
+character ( len = io_len_Varname ), parameter :: VarName_SwpY       = "Schwerpunkt Y"
+character ( len = io_len_Varname ), parameter :: VarName_SwpZ       = "Schwerpunkt Z"
+character ( len = io_len_Varname ), parameter :: VarName_M2XI       = "M2_x_i"
+character ( len = io_len_Varname ), parameter :: VarName_M2XJ       = "M2_x_j"
+character ( len = io_len_Varname ), parameter :: VarName_M2YI       = "M2_y_i"
+character ( len = io_len_Varname ), parameter :: VarName_M2YJ       = "M2_y_j"
 end module const
