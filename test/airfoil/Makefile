@@ -21,6 +21,7 @@ run: gridgen
 	@ln -sf gridgen/git.bin
 	@ln -sf gridgen/bc.bin
 	@$(PROGRAM) #-debug
+	@$(HOMEDIR)bin/sol_info
 
 gridgen:
 	@$(MAKE) -C gridgen run --no-print-directory

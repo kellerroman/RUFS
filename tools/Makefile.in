@@ -1,0 +1,43 @@
+FC=gfortran
+#FC=ifort
+
+CFLAGS = -std=f2003
+CFLAGS += -Wconversion -Wall -Wextra -Warray-temporaries
+#CFLAGS += -DDEBUG #Unnecessary comments are oppressed
+#CFLAGS += -O3
+#CFLAGS += -g -fbacktrace -ffpe-trap=invalid,zero,overflow -fcheck=all -fbounds-check
+
+ifneq (,$(findstring $(FC),ifort))
+CFLAGS +=-assume buffered_io
+endif
+SOURCE_DIR = ../tools
+
+EXECUTABLE_DIR = ../bin
+
+VPATH := $(SOURCE_DIR):../src
+
+_EXE = sol_info
+
+EXE = $(patsubst %,$(EXECUTABLE_DIR)/%,$(_EXE))
+
+all: FORCE $(EXE)
+
+FORCE:
+	mkdir -p $(EXECUTABLE_DIR)
+
+.PHONY: clean
+
+.SILENT: clean FORCE
+
+clean:
+	rm -vf $(EXECUTABLE_DIR)/*
+	rm -vrf *.mod
+	rm -vrf *~
+
+$(EXECUTABLE_DIR)/sol_info: sol_info.F90 write_screen.o const.o types.o
+
+$(EXECUTABLE_DIR)/% : %.F90	
+	$(FC) $(CFLAGS) $^ -o $@
+
+%.o: %.F90
+	$(FC) $(CFLAGS) $< -c
