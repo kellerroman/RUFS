@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ######################################################################################################
 # DEPENDENCY MAKEFILE CREATER FOR FORTRAN PROGRAMS
@@ -22,7 +22,7 @@
 # CHANGELOG:
 # 12.02.2015,RK:     START DES CHANGELOGS:
 # 13.02.2015,RK: DEPENDENCIES FÜR CFLAGS HINZUGEFÜGT
-# 
+# 17.04.2015,RK: CONVERTED TO PYTHON3
 ######################################################################################################
 #
 # TODO:
@@ -79,8 +79,8 @@ include_cflags_dependencies = False
 ################## END  CONFIG
 ######################################################################################################
 
-print "DEPENDENCY MAKEFILE CREATER FOR FORTRAN PROGRAMS"
-print "V 0001 - 13.03.2015"
+print("DEPENDENCY MAKEFILE CREATER FOR FORTRAN PROGRAMS")
+print("V 0001 - 13.03.2015")
 folder = ""
 files = []
 routine_links = []
@@ -94,11 +94,11 @@ for i in sys.argv:
     il = i.lower()
     if il ==  "-debug":
         do_debug = True
-        print "-------------------------------------------------"
-        print "------------RUNNING IN DEBUG MODE----------------"
-        print "-------------------------------------------------"
+        print("-------------------------------------------------")
+        print("------------RUNNING IN DEBUG MODE----------------")
+        print("-------------------------------------------------")
     elif os.path.isdir(i):
-	folder = i
+        folder = i
     elif il == "-print_cflags":
         print_cflags = True
     elif il == "-print_dep":
@@ -107,15 +107,15 @@ for i in sys.argv:
         include_cflags_dependencies = False
 
 if folder == "":
-    print "Folder to work on:"
+    print("Folder to work on:")
     while 1==1:
-        folder = raw_input()
+        folder = input()
         if os.path.isdir(folder):
             break 
         else:
-            print "Folder not found! Try again:"
+            print("Folder not found! Try again:")
     
-print "Working on Folder:",folder
+print("Working on Folder:",folder)
 for f in get_filepaths(folder):
   for end in endungen:
     if f.endswith(end):
@@ -161,42 +161,42 @@ file_dep = []
 
 if print_cflags:
    for l in cflags:
-      print l,
+      print(l, end=' ')
       for i,f in enumerate(cflag_link):
          if l in f:
-            print f
+            print(f)
 
 
 for i,f in enumerate(files):
    if print_dep:
-      print f
+      print(f)
    file_dep.append([])
    for l in routine_links[i]:
       if structure.get(l,-1) != -1 and structure.get(l,-1) != i:
          if print_dep:
-            print "   ->",l,"form",files[structure.get(l)]
+            print("   ->",l,"form",files[structure.get(l)])
          if structure.get(l) not in file_dep[i]:
             file_dep[i].append(structure.get(l))
 
 
 fsrc = open(source_makefile,"w+")
-print >>fsrc,source_name+"+=",
+print(source_name+"+=", end=' ', file=fsrc)
 for i,f in enumerate(files):
-  print >>fsrc,os.path.basename(f),
-print >>fsrc
+  print(os.path.basename(f), end=' ', file=fsrc)
+print(file=fsrc)
 fsrc.close()
 
 fdep = open(depend_makefile,"w+")
 for i,f in enumerate(files):
   if len(file_dep[i]) > 0 or len(cflag_link[i]) > 0:
-   print >>fdep,object_prefix+os.path.splitext(os.path.basename(f))[0]+".o"+":",
+   print(object_prefix+os.path.splitext(os.path.basename(f))[0]+".o"+":", end=' ', file=fdep)
 
    for l in file_dep[i]:
-      print >>fdep,object_prefix+os.path.basename(files[l]).split(".")[0]+".o",
+      print(object_prefix+os.path.basename(files[l]).split(".")[0]+".o", end=' ', file=fdep)
 
    for l in cflag_link[i]:
-      print >>fdep,cflags_dir+l,
-   print >>fdep
+      print(cflags_dir+l, end=' ', file=fdep)
+   print(file=fdep)
 fdep.close()
 
 quit()
