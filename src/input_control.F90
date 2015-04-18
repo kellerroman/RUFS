@@ -4,7 +4,7 @@ use global
 implicit none
 
 ! this is read in input_control
-n_BC_Cells = 2
+n_BC_Cells = 1
 
 nVar = 4
 

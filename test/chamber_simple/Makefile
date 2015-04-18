@@ -11,7 +11,9 @@ PROGRAM=$(HOMEDIR)bin/solver
 .PHONY: all cmp run gridgen clean cp
 
 	
-all: cmp run
+all: 
+	@true
+#cmp run
 
 cmp:
 	@$(MAKE) -C $(HOMEDIR)
