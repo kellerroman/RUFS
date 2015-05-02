@@ -1,7 +1,7 @@
 FC=gfortran
 #FC=ifort
 
-CFLAGS = -std=f2003
+#CFLAGS = -std=f2003
 CFLAGS += -Wconversion -Wall -Wextra -Warray-temporaries
 #CFLAGS += -DDEBUG #Unnecessary comments are oppressed
 #CFLAGS += -O3
@@ -16,7 +16,10 @@ EXECUTABLE_DIR = ../bin
 
 VPATH := $(SOURCE_DIR):../src
 
-_EXE = sol_info
+_EXE = sol_info \
+	   show_sol \
+	   sol2visit\
+	   git2visit
 
 EXE = $(patsubst %,$(EXECUTABLE_DIR)/%,$(_EXE))
 
@@ -36,8 +39,24 @@ clean:
 
 $(EXECUTABLE_DIR)/sol_info: sol_info.F90 write_screen.o const.o types.o
 
-$(EXECUTABLE_DIR)/% : %.F90	
+$(EXECUTABLE_DIR)/% : %.F90	write_screen.o const.o types.o
 	$(FC) $(CFLAGS) $^ -o $@
+	
+$(EXECUTABLE_DIR)/sol2visit : sol2visit.F90	write_screen.o const.o types.o
+	$(FC) $(CFLAGS) $^ -o $@ -I/usr/local/silo/include \
+							 -I/usr/include  \
+							 -L/usr/local/silo/lib \
+							 -L/usr/lib64 \
+	 						 -lsiloh5 -lhdf5 -lsz -lm -lz -lstdc++ 
+	 						 
+$(EXECUTABLE_DIR)/git2visit : git2visit.F90	write_screen.o const.o types.o
+	$(FC) $(CFLAGS) $^ -o $@ -I/usr/local/silo/include \
+							 -I/usr/include  \
+							 -L/usr/local/silo/lib \
+							 -L/usr/lib64 \
+	 						 -lsiloh5 -lhdf5 -lsz -lm -lz -lstdc++ 	
+	
+	
 
 %.o: %.F90
 	$(FC) $(CFLAGS) $< -c

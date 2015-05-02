@@ -21,13 +21,13 @@ run: gridgen
 	@ln -sf gridgen/git.bin
 	@ln -sf gridgen/bc.bin
 	@$(PROGRAM) #-debug
-	@$(HOMEDIR)bin/sol_info
+	@$(HOMEDIR)bin/sol2visit
 
 gridgen:
 	@$(MAKE) -C gridgen run --no-print-directory
 	
 clean:
-	@rm -vf git_out.bin *.o *.mod *.ufo *.dat *.plt *.png *.vtk *.txt *.bin
+	@rm -vf git_out.bin *.o *.mod *.ufo *.dat *.plt *.png *.vtk *.txt *.bin *.silo
 	@rm -vrf *~
 	@$(MAKE) -C gridgen clean --no-print-directory
 

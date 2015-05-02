@@ -8,6 +8,18 @@ integer , parameter :: fu = 99
 
 integer              :: b,var,i,j,k
 
+integer              :: nBCC_out(3,2)
+!< ANZAHL DER RANDZELLEN DIE MIT AUSGEGEBEN WERDEN SOLLEN
+!< (Gitter Richtung (i,j,k); Anfang(1)/Ende(2)
+
+
+nBCC_out = 0
+
+if  (control_bc_cells_out == 1) then
+   ! Output all boundary values
+   nBCC_out(1:Dimen,:) = n_BC_Cells
+end if
+
 
 if (sol_out) then
    call wr("Writing Solution to File",3)
@@ -25,9 +37,16 @@ if (sol_out) then
       write(fu) dp !SIZE OF SOLUTION VARIABLES
       write(fu) io_len_VarName !LEN OF VARIABLE NAMES
       do b = 1, nBlock
-         write(fu) block(b) % nCell(1:Dimen)
+         do var = 1,Dimen
+            write(fu) block(b) % nCell(var)+sum(nBCC_out(var,:))
+         end do
       end do
-      write(fu) VarName
+      do b = 1,nBlock
+         write(fu) nBCC_out(1:Dimen,:)
+      end do
+      if (sol_out_nVar > 0) then
+         write(fu) VarName(1:sol_out_nVar)
+      end if
       write(fu) io_marker_header_end
 
    else
@@ -45,34 +64,70 @@ if (sol_out) then
       do var = 1, sol_out_nVar
          write(fu) io_marker_solution_var_start
          select case(VarName(var))
-            case(VarName_Jac)
-               write(fu) (((block(b) % Jac(i,j,k),i = 1,block(b) % nCell(1) ) &
-                                                 ,j = 1,block(b) % nCell(2) ) &
-                                                 ,k = 1,block(b) % nCell(3) )
+            case(VarName_Rho)
+               write(fu) (((block(b) % Q(i,j,k,1)           ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_SpU)
+               write(fu) (((block(b) % Q(i,j,k,2)           ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_SpV)
+               write(fu) (((block(b) % Q(i,j,k,3)           ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_Ene)
+               write(fu) (((block(b) % Q(i,j,k,4)           ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
             case(VarName_SwpX)
-               write(fu) (((block(b) % schwerpunkt(i,j,k,1),i = 1,block(b) % nCell(1) ) &
-                                                 ,j = 1,block(b) % nCell(2) ) &
-                                                 ,k = 1,block(b) % nCell(3) )
+               write(fu) (((block(b) % schwerpunkt(i,j,k,1) ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
             case(VarName_SwpY)
-               write(fu) (((block(b) % schwerpunkt(i,j,k,2),i = 1,block(b) % nCell(1) ) &
-                                                 ,j = 1,block(b) % nCell(2) ) &
-                                                 ,k = 1,block(b) % nCell(3) )
+               write(fu) (((block(b) % schwerpunkt(i,j,k,2) ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_Jac)
+               write(fu) (((block(b) % Jac(i,j,k)           ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_JacI)
+               write(fu) (((block(b) % JacI(i,j,k)          ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_M1XI)
+               write(fu) (((block(b) % metric1(i,j,k,1,1)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_M1XJ)
+               write(fu) (((block(b) % metric1(i,j,k,1,2)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_M1YI)
+               write(fu) (((block(b) % metric1(i,j,k,2,1)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_M1YJ)
+               write(fu) (((block(b) % metric1(i,j,k,2,2)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
             case(VarName_M2XI)
-               write(fu) (((block(b) % metric2(i,j,k,1,1),i = 1,block(b) % nCell(1) ) &
-                                                 ,j = 1,block(b) % nCell(2) ) &
-                                                 ,k = 1,block(b) % nCell(3) )
+               write(fu) (((block(b) % metric2(i,j,k,1,1)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
             case(VarName_M2XJ)
-               write(fu) (((block(b) % metric2(i,j,k,1,2),i = 1,block(b) % nCell(1) ) &
-                                                 ,j = 1,block(b) % nCell(2) ) &
-                                                 ,k = 1,block(b) % nCell(3) )
+               write(fu) (((block(b) % metric2(i,j,k,1,2)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
             case(VarName_M2YI)
-               write(fu) (((block(b) % metric2(i,j,k,2,1),i = 1,block(b) % nCell(1) ) &
-                                                 ,j = 1,block(b) % nCell(2) ) &
-                                                 ,k = 1,block(b) % nCell(3) )
+               write(fu) (((block(b) % metric2(i,j,k,2,1)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
             case(VarName_M2YJ)
-               write(fu) (((block(b) % metric2(i,j,k,2,2),i = 1,block(b) % nCell(1) ) &
-                                                 ,j = 1,block(b) % nCell(2) ) &
-                                                 ,k = 1,block(b) % nCell(3) )
+               write(fu) (((block(b) % metric2(i,j,k,2,2)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
 
             case default
                call error("VAR TO WRITE UNKNOWN: "//trim(varname(var)),__FILE__,__LINE__)
@@ -83,7 +138,7 @@ if (sol_out) then
    end do
    write(fu) io_marker_solution_end
 
-   if (iteration == control_num_iteration) then ! Try to set the end_marker at the last iteration
+   if (iteration >= control_num_iteration) then ! Try to set the end_marker at the last iteration
       write(fu) io_marker_file_end
    end if
    close (fu)

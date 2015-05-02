@@ -26,7 +26,7 @@ gridgen:
 	@$(MAKE) -C gridgen run
 	
 clean:
-	@rm -vf git_out.bin *.o *.mod *.ufo *.dat *.plt *.png *.vtk *.txt 
+	@rm -vf git_out.bin *.o *.mod *.ufo *.dat *.plt *.png *.vtk *.txt *.silo
 	@rm -vrf *~
 	@$(MAKE) -C gridgen clean
 

@@ -19,7 +19,7 @@ cmp:
 run: git.bin
 	@echo 'Running Grid-Adaper on simple Chamber'
 	@$(PROGRAM) #-debug
-	@$(HOMEDIR)bin/sol_info
+	@$(HOMEDIR)bin/show_sol
 
 git.bin: gridgen
 	@./$<

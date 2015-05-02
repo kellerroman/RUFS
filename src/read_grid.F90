@@ -18,6 +18,7 @@ open(fu_git,file=trim(file_git_in),form="UNFORMATTED",access="STREAM",status="OL
 read(fu_git) fileVersion,Dimen,nBlock
 
 nFaces = Dimen * 2
+nCorners = 2**Dimen
 
 if (fileVersion /= Version) then
 call error("Gitterdatei Version stimmt nicht",__FILE__,__LINE__)

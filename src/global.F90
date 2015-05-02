@@ -12,6 +12,8 @@ integer                             :: Dimen
 !< Dimension des Gitters
 integer                             :: nFaces
 !< Anzahl der Rechenblock-Randflächen
+integer                             :: nCorners
+!< Anzahl der Rechenblock-Randecken
 integer                             :: nBlock
 !< Anzahl der Rechenblöcke
 

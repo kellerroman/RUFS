@@ -1,4 +1,4 @@
-program sol_info
+program show_sol
    use const
    use types
    implicit none
@@ -7,6 +7,8 @@ program sol_info
    integer :: arg_count
    character(len = 100) :: arg
    character(len = 100) :: sol_file
+   character(len = 100) :: git_file
+   character(len = 100) :: out_file
    character(len = io_marker_len) :: marker
    character(len =io_len_VarName), allocatable :: VarName(:)
    integer :: sol_file_version,Dimen,nVar,nBlock,Precision,len_VarName
@@ -18,15 +20,16 @@ program sol_info
    integer :: num_ausgabe
    !< Anzahl der Ausgabepunkt ider der Datei
    integer :: status
-   integer :: mypos
    integer :: nCell
 
    integer :: nBCC_out(3,2)
    !< Gibt die Ausgeschriebenen Randzellen an
-   integer :: b,var
+   integer :: b,var,i,j
    sol_file = "sol.bin"
+   git_file = "git.bin"
+   out_file = "sol.vtk"
 
-   call wr("SOL_INFO",1)
+   call wr("SHOW SOLUTION",1)
 
    arg_count=command_argument_count()
    open( unit = fu , file = trim(sol_file)                             &
@@ -78,9 +81,12 @@ program sol_info
    write(*,'(A9,1X,A3,1X,3(A4,1X))') "","#", "I","J","K"
    nCell = 0
    do b = 1,nBlock
+      block(b) % nCell = 1
       read(fu) block(b) % nCell(1:Dimen)
+
       write(*,'(10X,I3,1X,3(I4,1X))') b,block(b) % nCell(1:Dimen)
-      nCell = nCell + product(block(b) % nCell(1:Dimen))
+      nCell = nCell + product(block(b) % nCell)
+      allocate ( block(b) % Q(block(b) % nCell(1),block(b) % nCell(2),block(b) % nCell(3),nVar))
    end do
    write(*,'(10X,A,1X,I0)') "Total Number of Cells:" ,nCell
 
@@ -102,23 +108,13 @@ program sol_info
       write(*,marker_error) __LINE__,"IO_MARKER_HEADER_END",marker
       STOP 1
    end if
-inquire(fu, pos=mypos)
 call wr("Iterations",2)
-write(*,'(10X)',advance= "no")
+!write(*,'(10X)',advance= "no")
 num_ausgabe = 0
 do
-   read(fu,iostat=status,pos = mypos) marker
+!   read(fu,iostat=status,pos = mypos) marker
 
-!   read(fu,iostat=status) marker
-   mypos = mypos                                &
-         + io_marker_len * 3                    & ! Skip the Markers for Solution and sol_header
-                                                  ! without the solution end marker
-                                                  ! is checked later to verify complete solution
-         + ip                                   & ! Skip the header Values
-         + io_marker_len * nBlock * 2           & ! Skipt block marker
-         + io_marker_len * nBlock * nVar * 2    & ! Skipt var marker
-         + dp * nVar * nCell
-
+   read(fu,iostat=status) marker
 
    if (status /= 0 .or. marker == io_marker_file_end) then
       if (status /= 0) then
@@ -138,22 +134,62 @@ do
       end if
 
       read(fu) iteration
-      write(*,'(I0,1X)',advance = "no") iteration
+!      write(*,'(I0,1X)',advance = "no") iteration
 
 
-!      read(fu) marker
-!      if (marker /= io_marker_solution_header_end) then
-!         write(*,*) "ERROR: IO_MARKER_SOLUTION_HEADER_END"
-!         STOP 1
-!      end if
-!
-      !! if the file is not currupt, we must find the SOLUTION END MARKER @ mypos
-      read(fu,pos = mypos,iostat=status) marker
+      read(fu) marker
+      if (marker /= io_marker_solution_header_end) then
+         write(*,marker_error) __LINE__,"IO_MARKER_SOLUTION_HEADER_END",marker
+         STOP 1
+      end if
+
+      do b = 1, nBlock
+         read(fu) marker
+         if (marker /= io_marker_solution_block_start) then
+            write(*,marker_error) __LINE__,"IO_MARKER_SOLUTION_BLOCK_START",marker
+            STOP 1
+         end if
+         do var = 1, nVar
+            read(fu) marker
+            if (marker /= io_marker_solution_var_start) then
+               write(*,marker_error) __LINE__,"IO_MARKER_SOLUTION_VAR_START",marker
+               STOP 1
+            end if
+
+            read(fu) block(b) % Q(:,:,:,var)
+            write(*,*) VarName(var)
+            write(*,'(A3)',advance = "no") "J\I"
+            do i = 1,block(b) %  nCell(1)
+               write(*,'(I9,1X)',advance= "no") I-nBCC_out(1,1)
+            end do
+            write(*,*)
+            do j = block(b) %  nCell(2),1,-1
+               write(*,'(I3)',advance="no") j-nBCC_out(2,1)
+               do i = 1,block(b) %  nCell(1)
+!                  write(*,'(1PF10.5)',advance= "no") block(b) % Q(i,j,1,var)
+                  write(*,'(ES10.2)',advance= "no") block(b) % Q(i,j,1,var)
+               end do
+               write(*,*)
+            end do
+            read(fu) marker
+            if (marker /= io_marker_solution_var_end) then
+               write(*,marker_error) __LINE__,"IO_MARKER_SOLUTION_VAR_END",marker
+               STOP 1
+            end if
+
+         end do
+         read(fu) marker
+         if (marker /= io_marker_solution_block_end) then
+            write(*,marker_error) __LINE__,"IO_MARKER_SOLUTION_BLOCK_END",marker
+            STOP 1
+         end if
+      end do
+
+      read(fu) marker
       if (status /= 0 .or. marker /= io_marker_solution_end) then
          write(*,marker_error) __LINE__,"IO_MARKER_SOLUTION_END",marker
          STOP 1
       end if
-      mypos = mypos + io_marker_len
 
    end if
 
@@ -161,7 +197,7 @@ end do
 
    close(fu)
    write(*,*)
-   call wr("SOL_INFO done",1)
-end program sol_info
+   call wr("SHOW SOLUTION done",1)
+end program show_sol
 
 

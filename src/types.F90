@@ -38,6 +38,9 @@ type :: tblock
    real(kind=dp),allocatable :: Q(:,:,:,:)
    !< Cell Centered Variables (I,J,K,VAR-INDEX)
 
+   real(kind=dp),allocatable :: Flux(:,:,:,:,:)
+   !< Cell Centered Variables (I,J,K,VAR-INDEX,FLUX_DIR)
+
    real(kind=dp),allocatable :: xyz(:,:,:,:)
    !< GITTERPUNKTE -POSITION (I,J,K,COORD)
 

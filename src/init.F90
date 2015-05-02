@@ -1,6 +1,7 @@
 subroutine init()
-use control
 implicit none
+
+call allocate_vars()
 
 call calc_metrices()
 

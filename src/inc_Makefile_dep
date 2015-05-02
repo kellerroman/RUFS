@@ -1,14 +1,18 @@
-init.o: control.o calc_metrices.o 
+calc_fluxes.o: global.o const.o control.o 
+init.o: allocate_vars.o calc_metrices.o 
 read_bc.o: global.o control.o error_message.o 
 global.o: const.o types.o 
 end_program.o: const.o write_screen.o 
 input.o: global.o const.o control.o input_control.o read_grid.o read_bc.o write_screen.o 
 control.o: const.o 
 write_residual.o: control.o global.o 
+loop_indices_for_bc_faces.o: global.o 
 read_grid.o: global.o control.o error_message.o 
+set_boundary.o: global.o loop_indices_for_bc_faces.o error_message.o 
 iter_control.o: control.o global.o 
-main.o: const.o global.o write_screen.o input.o init.o iter_control.o write_residual.o write_solution.o end_program.o 
-write_solution.o: const.o control.o global.o write_screen.o 
+main.o: const.o global.o write_screen.o input.o init.o iter_control.o set_boundary.o calc_fluxes.o write_residual.o write_solution.o end_program.o 
+write_solution.o: const.o control.o global.o write_screen.o error_message.o 
 input_control.o: control.o global.o 
 error_message.o: const.o end_program.o 
-calc_metrices.o: global.o const.o control.o error_message.o 
+allocate_vars.o: control.o global.o 
+calc_metrices.o: global.o const.o control.o loop_indices_for_bc_faces.o error_message.o 
