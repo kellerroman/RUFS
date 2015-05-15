@@ -17,11 +17,12 @@ main_loop: do while (.not. stop_iter)
 
    call set_boundary()
    call calc_fluxes()
-!   call calc_residual()
+   call calc_residual()
+   call calc_timestep()
 
    call write_residual()
-!   call calc_timestep()
-!   call update_sol()
+
+   call update_sol()
 
    call write_solution()
 end do main_loop

@@ -16,6 +16,8 @@ integer                             :: nCorners
 !< Anzahl der Rechenblock-Randecken
 integer                             :: nBlock
 !< Anzahl der Rechenblöcke
+integer                             :: nCell
+!< Anzahl der Zellen für die Berechnung des Durchschnittlichen Residums (wird in read_grid gesetzt)
 
 logical :: res_out
 !< Is set true if Residual is outputted to screen/file
@@ -32,5 +34,10 @@ logical :: write_sol_header
 
 integer                             :: iteration
 !< is the current iteration
+real(kind = dp) :: time
+
+real(kind = dp) :: MinRes
+real(kind = dp) :: MaxRes
+real(kind = dp) :: AvgRes
 
 end module global

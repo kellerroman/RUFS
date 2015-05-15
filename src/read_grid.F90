@@ -8,7 +8,11 @@ integer, parameter :: Version = 1000
 integer :: fileVersion
 integer :: b, i ,j ,k ,d
 logical :: fexists
+
+nCell = 0
+
 inquire(file=trim(file_git_in),exist=fexists)
+
 if(.not. fexists) then
   call error("GITTER INPUT DATEI konnte nicht gefunden werden: "//TRIM(file_git_in),__FILE__,__LINE__)
 end if
@@ -33,6 +37,8 @@ do b = 1,nBlock
    read(fu_git) block(b) % nPkt(1:Dimen)
     
    block(b) % nCell(1:Dimen) = block(b) % nPkt(1:Dimen)-1
+
+   nCell = nCell + product(block(b) % nCell)
 
    allocate (block(b) % xyz(1-n_BC_Cells : block(b)%nPkt(1)+n_BC_Cells &
                            ,1-n_BC_Cells : block(b)%nPkt(2)+n_BC_Cells &

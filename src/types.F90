@@ -38,11 +38,18 @@ type :: tblock
    real(kind=dp),allocatable :: Q(:,:,:,:)
    !< Cell Centered Variables (I,J,K,VAR-INDEX)
 
+   real(kind=dp),allocatable :: Res(:,:,:,:)
+   !< Cell Residual Variables (I,J,K,VAR-INDEX)
+
    real(kind=dp),allocatable :: Flux(:,:,:,:,:)
    !< Cell Centered Variables (I,J,K,VAR-INDEX,FLUX_DIR)
 
    real(kind=dp),allocatable :: xyz(:,:,:,:)
    !< GITTERPUNKTE -POSITION (I,J,K,COORD)
+
+   real(kind=dp),allocatable :: dt(:,:,:)
+   !< Cell-Timestep (I,J,K)
+
 
    real(kind=dp),allocatable :: schwerpunkt(:,:,:,:)
    
@@ -56,8 +63,14 @@ type :: tblock
    
    real(kind=dp),allocatable :: Jac (:,:,:)
    
-   real(kind=dp),allocatable :: JacI(:,:,:)
+   real(kind=dp),allocatable :: JacI (:,:,:)
    
+   real(kind=dp),allocatable :: Edge_Len (:,:,:,:)
+   !< Edge Length (I,J,K, IJK)
+   real(kind=dp),allocatable :: Edge_Vec (:,:,:,:,:)
+   !< Edge Vector (I,J,K, EDGE_DIR, COORD)
+   real(kind=dp),allocatable :: Area (:,:,:)
+
    type(tbc), allocatable    :: face(:)
    !< GIBT BLOCKVERBDINUNG DES BLOCKES AN: (FACE)
    !< FACE: 1 = W, 2 = E, 3 = S, 4 = N, 5 = B, 6 = F

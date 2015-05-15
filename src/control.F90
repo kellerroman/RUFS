@@ -20,6 +20,11 @@ integer                             :: control_bc_cells_out
 !< 0: not outputted
 !< 1: outputted
 
+real(kind=dp)                       :: control_CFL
+
+
+
+logical :: const_dt
 !!! CALCULATED VARIABLES 
 integer :: n_BC_Cells
 

@@ -35,5 +35,6 @@ do b = 1, nBlock
    end do
    write(*,*)
 end do
+write(*,*) "Gesammte Anzahl Zellen:", nCell
 
 end subroutine input

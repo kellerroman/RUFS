@@ -5,8 +5,285 @@ subroutine calc_fluxes()
    implicit none
 
 
+   real(kind = dp) :: met(2,2)
+   real(kind = dp) :: Jac
+   real(kind = dp) :: sp(2,2)
+   real(kind = dp) :: UL(nVar),UR(nVar)
+   real(kind = dp) :: rho, u , v , gam1, p, velsq
+   real(kind = dp) :: flux(nVar)
 
 
+
+   integer :: b,i,j,k,d1,d2
+
+   gam1 = 1.4E0_dp-1.0E0_dp
+!     gamma = 1.4
+!   density = u(1)
+!  velocity = u(2)/u(1)
+!  pressure = (gamma-1.0)*( u(3) - 0.5*density*velocity*velocity )
+!  enthalpy = u(3) + pressure
+!
+!!Evaluate the physical flux (mass, momentum, and energy fluxes).
+!  physical_flux(1) =           density * velocity
+!  physical_flux(2) = (density*velocity)* velocity + pressure
+!  physical_flux(3) =          enthalpy * velocity
+
+
+
+
+   do b = 1,nBlock
+      do k = 1, block(b) % nPkt(3)
+         do j = 1, block(b) % nCell(2)
+            do i = 1, block(b) % nPkt(1)
+               UR = block(b) % Q(i,j,k,:)
+               UL = block(b) % Q(i-1,j,k,:)
+
+
+               flux = 0.5E0_dp * (UR + UL)
+               rho = flux(1)
+               u = flux(2) / rho
+               v = flux(3) / rho
+               velsq = u*u+v*v
+
+               p = gam1 * (flux(4) - 0.5E0_dp * rho * velsq)
+
+               flux = flux * u
+               flux(2) = flux(2) + p
+
+               block(b) % Flux(i,j,k,:,1) = flux
+
+!               if (iteration == 16) then
+!                  write(*,*) i,j
+!                  write(*,*) UR
+!                  write(*,*) UL
+!                  block(b) % Flux(i,j,k,:,1) = - Rotated_RHLL(UL,UR,1.0E0_dp,0.0E0_dp,1)
+!               end if
+               block(b) % Flux(i,j,k,:,1) = - Rotated_RHLL(UL,UR,1.0E0_dp,0.0E0_dp,0)
+!               if (j == 1) then
+!!                 write(*,'(I0,3(ES10.3))',ADVANCE="NO") i,UL(1), UR(1),rho
+!                  write(*,'(I0,8(ES10.3))') i,flux,block(b) % Flux(i,j,k,:,1)
+!               end if
+!               write(*,*) i,j,flux(2),rho
+            end do
+         end do
+      end do
+   end do
+!      do d1 = 1,2
+!         do d2 = 1,2
+!            met(d1,d2) = 0.5e0_dp * (block(b) %
+!         end do
+!      end do
+
+
+contains
+
+!*****************************************************************************
+!* -- Rotated-Roe-HLL Flux Function ---
+!*
+!* H. Nishikawa and K. Kitamura, Very Simple, Carbuncle-Free, Boundary-Layer
+!* Resolving, Rotated-Hybrid Riemann Solvers,
+!* Journal of Computational Physics, 227, pp. 2560-2581, 2008.
+!*
+!* The most robust Riemann solver known to the author (in terms of nonlinear
+!* instability such as carbuncle).
+!*
+!* NB: At a boundary face, need to switch to a geometric normal vector:
+!*               (nx2,ny2)=(nx, ny), (nx1,ny1)=(-ny,nx).
+!*     This is not implemented here. It requires information on whether
+!*     the geometric normal, (nx,ny), is on a boundary face or not.
+!*     It shouldn't be difficult for you to implement it.
+!*
+!* Katate Masatsuka, February 2010. http://www.cfdbooks.com
+!*****************************************************************************
+ function Rotated_RHLL(uL, uR, nx, ny,debug)
+ use const, only : dp
+ implicit none
+ real(kind = dp) :: uL(4), uR(4)    !  Input: conservative variables rho*[1, u, v, E]
+ real(kind = dp) :: nx, ny          !  Input: face normal vector, [nx, ny] (Left-to-Right)
+ real(kind = dp) :: Rotated_RHLL(4) ! Output: Rotated_RHLL flux function.
+ integer :: debug
+
+
+
+!Local constants
+ real(kind = dp) :: gamma                          ! Ratio of specific heat.
+ real(kind = dp) :: zero, fifth, half, one, two    ! Numbers
+ real(kind = dp) :: eps                            !
+!Local variables
+ real(kind = dp) :: nx1, ny1, nx2, ny2             ! Rotated normals, n1 and n2
+ real(kind = dp) :: tx, ty                         ! Tangent vector (taken as n1)
+ real(kind = dp) :: alpha1, alpha2                 ! Projections of the new normals
+ real(kind = dp) :: vxL, vxR, vyL, vyR             ! Velocity components.
+ real(kind = dp) :: rhoL, rhoR, pL, pR             ! Primitive variables.
+ real(kind = dp) :: vnL, vnR, vtL, vtR             ! Normal and tagent velocities
+ real(kind = dp) :: aL, aR, HL, HR                 ! Speeds of sound and total enthalpy
+ real(kind = dp) :: RT,rho,vx,vy,H,a               ! Roe-averages
+ real(kind = dp) :: vn, vt                         ! Normal and tagent velocities(Roe-average)
+ real(kind = dp) :: drho,dvx,dvy,dvn,dvt,dp1,dV(4)  ! Wave strenghs
+ real(kind = dp) :: abs_dq                         ! Magnitude of the velocity difference
+ real(kind = dp) :: abs_ws(4),ws(4),dws(4), Rv(4,4)! Wave speeds and right-eigevectors
+ real(kind = dp) :: SRp,SLm                        ! Wave speeds for the HLL part
+ real(kind = dp) :: fL(4), fR(4), diss(4)          ! Fluxes ad dissipation term
+ real(kind = dp) :: temp
+ integer :: i, j
+
+!Constants.
+     gamma = 1.4E0_dp
+      zero = 0.0E0_dp
+     fifth = 0.2E0_dp
+      half = 0.5E0_dp
+       one = 1.0E0_dp
+       two = 2.0E0_dp
+       eps = 1.0e-5_dp ! 1.0e-12 in the original paper (double precision)
+
+!Primitive and other variables.
+!  Left state
+    rhoL = uL(1)
+     vxL = uL(2)/uL(1)
+     vyL = uL(3)/uL(1)
+      pL = (gamma-one)*( uL(4) - half*rhoL*(vxL*vxL+vyL*vyL) )
+      aL = sqrt(gamma*pL/rhoL)
+      HL = ( uL(4) + pL ) / rhoL
+!  Right state
+    rhoR = uR(1)
+     vxR = uR(2)/uR(1)
+     vyR = uR(3)/uR(1)
+      pR = (gamma-one)*( uR(4) - half*rhoR*(vxR*vxR+vyR*vyR) )
+      if(debug == 1) write(*,*)gamma,pR,rhoR
+      aR = sqrt(gamma*pR/rhoR)
+      HR = ( uR(4) + pR ) / rhoR
+
+     vnL = vxL*nx + vyL*ny
+     vnR = vxR*nx + vyR*ny
+
+!Compute the flux.
+   fL(1) = rhoL*vnL
+   fL(2) = rhoL*vnL * vxL + pL*nx
+   fL(3) = rhoL*vnL * vyL + pL*ny
+   fL(4) = rhoL*vnL *  HL
+
+   fR(1) = rhoR*vnR
+   fR(2) = rhoR*vnR * vxR + pR*nx
+   fR(3) = rhoR*vnR * vyR + pR*ny
+   fR(4) = rhoR*vnR *  HR
+
+!Define n1 and n2, and compute alpha1 and alpha2: (4.2) in the original paper.
+!(NB: n1 and n2 may need to be frozen at some point during
+!     a steady calculation to fully make it converge. For time-accurate
+!     calculation, this is fine.)
+! NB: For a boundary face, set (nx2,ny2)=(nx,ny), (nx1,ny1)=(-ny,nx).
+
+    abs_dq = sqrt( (vxR-vxL)**2+(vyR-vyL)**2 )
+  if ( abs_dq > eps) then
+       nx1 = (vxR-vxL)/abs_dq
+       ny1 = (vyR-vyL)/abs_dq
+  else
+    nx1 = -ny
+    ny1 =  nx
+  endif
+    alpha1 = nx * nx1 + ny * ny1
+!   To make alpha1 always positive.
+      temp = sign(one,alpha1)
+       nx1 = temp * nx1
+       ny1 = temp * ny1
+    alpha1 = temp * alpha1
+
+! Take n2 as perpendicular to n1.
+       nx2 = -ny1
+       ny2 =  nx1
+    alpha2 = nx * nx2 + ny * ny2
+!   To make alpha2 always positive.
+      temp = sign(one,alpha2)
+       nx2 = temp * nx2
+       ny2 = temp * ny2
+    alpha2 = temp * alpha2
+
+!Now we are going to compute the Roe flux with n2 as the normal
+!and n1 as the tagent vector, with modified wave speeds (5.12)
+
+!Compute the Roe Averages
+     RT = sqrt(rhoR/rhoL)
+    rho = RT*rhoL
+     vx = (vxL+RT*vxR)/(one+RT)
+     vy = (vyL+RT*vyR)/(one+RT)
+      H = ( HL+RT* HR)/(one+RT)
+      a = sqrt( (gamma-one)*(H-half*(vx*vx+vy*vy)) )
+     vn = vx*nx2+vy*ny2
+     vt = vx*nx1+vy*ny1
+
+!Wave Strengths (remember that n2 is the normal and n1 is the tangent.)
+    vnL = vxL*nx2 + vyL*ny2
+    vnR = vxR*nx2 + vyR*ny2
+    vtL = vxL*nx1 + vyL*ny1
+    vtR = vxR*nx1 + vyR*ny1
+
+   drho = rhoR - rhoL
+     dp1 =   pR - pL
+    dvn =  vnR - vnL
+    dvt =  vtR - vtL
+
+  dV(1) = (dp1 - rho*a*dvn )/(two*a*a)
+  dV(2) =  rho*dvt/a
+  dV(3) =  drho - dp1/(a*a)
+  dV(4) = (dp1 + rho*a*dvn )/(two*a*a)
+
+!Wave Speeds for Roe flux part.
+    ws(1) = vn-a
+    ws(2) = vn
+    ws(3) = vn
+    ws(4) = vn+a
+  abs_ws  = abs(ws)
+
+!Harten's Entropy Fix JCP(1983), 49, pp357-393:
+!only for the nonlinear fields.
+  dws(1) = fifth
+   if (abs_ws(1)<dws(1)) abs_ws(1) = half*(abs_ws(1)*abs_ws(1)/dws(1)+dws(1))
+  dws(4) = fifth
+   if (abs_ws(4)<dws(4)) abs_ws(4) = half*(abs_ws(4)*abs_ws(4)/dws(4)+dws(4))
+
+!HLL wave speeds, evaluated with [nx1,ny1] (=tangent wrt n2).
+   SRp = max( zero, vtR + aR, vt + a)
+   SLm = min( zero, vtL - aL, vt - a)
+
+!Modified wave speeds for the Rotated-RHLL flux: (5.12) in the original paper.
+   ws = alpha2*abs_ws - ( alpha2*(SRp+SLm)*ws + two*alpha1*SRp*SLm )/ (SRp-SLm)
+
+!Right Eigenvectors: with n2 as normal and n1 as tangent.
+  tx = nx1
+  ty = ny1
+
+  Rv(1,1) = one
+  Rv(2,1) = vx - a*nx2
+  Rv(3,1) = vy - a*ny2
+  Rv(4,1) =  H - vn*a
+
+  Rv(1,2) = zero
+  Rv(2,2) = a*tx
+  Rv(3,2) = a*ty
+  Rv(4,2) = a*vt
+
+  Rv(1,3) = one
+  Rv(2,3) = vx
+  Rv(3,3) = vy
+  Rv(4,3) = half*(vx*vx+vy*vy)
+
+  Rv(1,4) = one
+  Rv(2,4) = vx + a*nx2
+  Rv(3,4) = vy + a*ny2
+  Rv(4,4) =  H + vn*a
+
+!Dissipation Term: Roe dissipation with the modified wave speeds.
+  diss = zero
+  do i=1,4
+   do j=1,4
+    diss(i) = diss(i) + ws(j)*dV(j)*Rv(i,j)
+   end do
+  end do
+
+!Compute the Rotated-RHLL flux.
+  Rotated_RHLL = (SRp*fL - SLm*fR)/(SRp-SLm) - half*diss
+
+ end function Rotated_RHLL
 
 
 

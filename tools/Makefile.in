@@ -19,7 +19,8 @@ VPATH := $(SOURCE_DIR):../src
 _EXE = sol_info \
 	   show_sol \
 	   sol2visit\
-	   git2visit
+	   git2visit \
+	   extract_1D
 
 EXE = $(patsubst %,$(EXECUTABLE_DIR)/%,$(_EXE))
 

@@ -20,6 +20,13 @@ subroutine calc_metrices()
                                                   + block(b) % xyz(i  ,j+1,k  ,:) &
                                                   + block(b) % xyz(i+1,j+1,k  ,:) &
                                                   ) * 0.25E0_dp
+
+               block(b) % Area(i,j,k) = 0.5E0_dp * abs (                                                 &
+                                      + ( block(b) % xyz(i  ,j  ,k  ,2) - block(b) % xyz(i+1,j+1,k  ,2)) &
+                                      * ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i+1,j  ,k  ,1)) &
+                                      + ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j+1,k  ,2)) &
+                                      * ( block(b) % xyz(i  ,j  ,k  ,1) - block(b) % xyz(i+1,j+1,k  ,1)) )
+
             end do
          end do
       end do
@@ -48,6 +55,7 @@ subroutine calc_metrices()
             call error ("Angrenzende Bloecke noch nicht implementiert",__FILE__,__LINE__)
          end if !conType < 0
       end do !f = 1,nFaces
+
 
       !!! ECKPUNKTE
       if (Dimen > 2) call error("3D NOCH NICHT IMPLEMENTIERT ECKPUNKTE",__FILE__,__LINE__)
@@ -107,6 +115,17 @@ subroutine calc_metrices()
                      end if
                   end do !d2 = 1,Dimen
                end do !d1 = 1, Dimen
+
+               block(b) % Area(i,j,k) = 0.5E0_dp * abs ( &
+                                      + ( block(b) % xyz(i  ,j  ,k  ,2) - block(b) % xyz(i+1,j+1,k  ,2)) &
+                                      * ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i+1,j  ,k  ,1)) &
+                                      + ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j+1,k  ,2)) &
+                                      * ( block(b) % xyz(i  ,j  ,k  ,1) - block(b) % xyz(i+1,j+1,k  ,1)) )
+
+
+
+
+
                block(b) % JacI(i,j,k) = block(b) % metric1(i,j,k,1,1) &
                                       * block(b) % metric1(i,j,k,2,2) &
                                       - block(b) % metric1(i,j,k,1,2) &
