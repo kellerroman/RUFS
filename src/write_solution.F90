@@ -88,6 +88,52 @@ if (sol_out) then
                write(fu) (((block(b) % schwerpunkt(i,j,k,2) ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
                                                             ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
                                                             ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+
+            case(VarName_Area)
+               write(fu) (((block(b) % area(i,j,k)          ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+
+            case(VarName_EdLeW)
+               write(fu) (((block(b) % Edge_Len(i  ,j,k,1)  ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_EdLeE)
+               write(fu) (((block(b) % Edge_Len(i+1,j,k,1)  ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+
+            case(VarName_EdLeS)
+               write(fu) (((block(b) % Edge_Len(i,j  ,k,2)  ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_EdLeN)
+               write(fu) (((block(b) % Edge_Len(i,j+1,k,2)  ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+
+            case(VarName_EdAnW)
+               write(fu) (((Normvec_Angle(-block(b) % Edge_Vec(i,j,k,1,:)) &
+                                                            ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_EdAnE)
+               write(fu) (((Normvec_Angle(block(b) % Edge_Vec(i+1,j,k,1,:)) &
+                                                            ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+
+            case(VarName_EdAnS)
+               write(fu) (((Normvec_Angle(block(b) % Edge_Vec(i,j,k,2,:)) &
+                                                            ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_EdAnN)
+               write(fu) (((Normvec_Angle(-block(b) % Edge_Vec(i,j+1,k,2,:)) &
+                                                            ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+
             case(VarName_Jac)
                write(fu) (((block(b) % Jac(i,j,k)           ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
                                                             ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
@@ -143,4 +189,24 @@ if (sol_out) then
    end if
    close (fu)
 end if
+
+contains
+
+function Normvec_Angle(vec) result( winkel)
+
+implicit none
+real(kind=dp), intent(in) :: vec(2)
+real(kind=dp) :: winkel
+real(kind=dp), parameter :: a2d = 180E0_dp / 3.1415927E0_dp
+!! NORMIERUNG:
+! ( 1, 0) =   0°
+! ( 0, 1) =  90°
+! (-1, 0) = 180°
+! (-1,-1) = 270°
+winkel = acos(vec(1)) * a2d
+if (vec(2) < 0 ) then
+   winkel = 360E0_dp - winkel
+end if
+end function
+
 end subroutine write_solution

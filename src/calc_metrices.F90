@@ -12,16 +12,16 @@ subroutine calc_metrices()
    integer :: ndir(3), nlv(3)
 
    do b = 1,nBlock
-      do k = 1,block(b) % nPkt(3)
-         do j = 1,block(b) % nPkt(2)
-            do i = 1,block(b) % nPkt(1)
+      do k = 1,block(b) % nCell(3)
+         do j = 1,block(b) % nCell(2)
+            do i = 1,block(b) % nCell(1)
                block(b) % schwerpunkt(i,j,k,:) =  ( block(b) % xyz(i  ,j  ,k  ,:) &
                                                   + block(b) % xyz(i+1,j  ,k  ,:) &
                                                   + block(b) % xyz(i  ,j+1,k  ,:) &
                                                   + block(b) % xyz(i+1,j+1,k  ,:) &
                                                   ) * 0.25E0_dp
 
-               block(b) % Area(i,j,k) = 0.5E0_dp * abs (                                                 &
+               block(b) % Area(i,j,k) = 2.0E0_dp / abs (                                                 &
                                       + ( block(b) % xyz(i  ,j  ,k  ,2) - block(b) % xyz(i+1,j+1,k  ,2)) &
                                       * ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i+1,j  ,k  ,1)) &
                                       + ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j+1,k  ,2)) &
@@ -30,6 +30,44 @@ subroutine calc_metrices()
             end do
          end do
       end do
+      do k = 1,block(b) % nCell(3)
+         do j = 1,block(b) % nCell(2)
+            do i = 1,block(b) % nPkt(1)
+               block(b) % Edge_Len(i,j,k,1) = sqrt ( &
+                                              ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
+                                            * ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
+                                            + ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+                                            * ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) )
+               ! Normalenvector ist dx = y2-y1
+               block(b) % Edge_Vec(1,i,j,k,1) = ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+                                              / block(b) % Edge_Len(i,j,k,1)
+               block(b) % Edge_Vec(2,i,j,k,1) = - ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
+                                              / block(b) % Edge_Len(i,j,k,1)
+
+            end do
+         end do
+      end do
+
+      do k = 1,block(b) % nCell(3)
+         do j = 1,block(b) % nPkt(2)
+            do i = 1,block(b) % nCell(1)
+               block(b) % Edge_Len(i,j,k,2) = sqrt ( &
+                                              ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
+                                            * ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
+                                            + ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+                                            * ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) )
+               ! Normalenvector ist dx = y2-y1
+               block(b) % Edge_Vec(1,i,j,k,2) = ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+                                              / block(b) % Edge_Len(i,j,k,2)
+               block(b) % Edge_Vec(2,i,j,k,2) = - ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
+                                              / block(b) % Edge_Len(i,j,k,2)
+
+            end do
+         end do
+      end do
+
+
+
       
       do f = 1,nFaces
 
@@ -115,16 +153,6 @@ subroutine calc_metrices()
                      end if
                   end do !d2 = 1,Dimen
                end do !d1 = 1, Dimen
-
-               block(b) % Area(i,j,k) = 0.5E0_dp * abs ( &
-                                      + ( block(b) % xyz(i  ,j  ,k  ,2) - block(b) % xyz(i+1,j+1,k  ,2)) &
-                                      * ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i+1,j  ,k  ,1)) &
-                                      + ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j+1,k  ,2)) &
-                                      * ( block(b) % xyz(i  ,j  ,k  ,1) - block(b) % xyz(i+1,j+1,k  ,1)) )
-
-
-
-
 
                block(b) % JacI(i,j,k) = block(b) % metric1(i,j,k,1,1) &
                                       * block(b) % metric1(i,j,k,2,2) &

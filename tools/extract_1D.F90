@@ -179,7 +179,7 @@ do
          end do
          j = block(b) %  nCell(2)/2
         write(arg,'("(I3,",I0,"("","",F20.12))")') nVar+1
-        write(fo,*) arg
+        write(fo,*)
          do i = 1,block(b) %  nCell(1)
             write(fo,arg) i-nBCC_out(1,1),DBLE(i-nBCC_out(1,1)),(block(b) % Q(i,j,1,var),var=1,nVar)
          end do

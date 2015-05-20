@@ -66,9 +66,15 @@ type :: tblock
    real(kind=dp),allocatable :: JacI (:,:,:)
    
    real(kind=dp),allocatable :: Edge_Len (:,:,:,:)
-   !< Edge Length (I,J,K, IJK)
+   !< Edge Length (I,J,K, EDGE_DIR)
+   !< EDGE_DIR: 1 ist in i-Richtung (West&Ost), 2 ist in j-Richtung (Süd&Nord),...
+   !<  i+1 West ist Ost, j+1 Süd ist Nord, k+1 Back ist Front
+
    real(kind=dp),allocatable :: Edge_Vec (:,:,:,:,:)
-   !< Edge Vector (I,J,K, EDGE_DIR, COORD)
+   !< Normalenvektor der Edge (I,J,K, EDGE_DIR, COORD)
+   !< Richtung ist für Ost&Süd Vektoren richtig, West&Nord muss mit -1 multipliziert werden.
+   !< EDGE_DIR: 1 ist in i-Richtung (West&Ost), 2 ist in j-Richtung (Süd&Nord),...
+   !< COORD gibt X,y,z wert an
    real(kind=dp),allocatable :: Area (:,:,:)
 
    type(tbc), allocatable    :: face(:)
