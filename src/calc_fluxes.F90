@@ -4,15 +4,12 @@ subroutine calc_fluxes()
    use control
    implicit none
 
-
    real(kind = dp) :: met(2,2)
    real(kind = dp) :: Jac
    real(kind = dp) :: sp(2,2)
    real(kind = dp) :: UL(nVar),UR(nVar)
    real(kind = dp) :: rho, u , v , gam1, p, velsq
    real(kind = dp) :: flux(nVar)
-
-
 
    integer :: b,i,j,k,d1,d2
 
@@ -32,12 +29,11 @@ subroutine calc_fluxes()
 
 
    do b = 1,nBlock
-      do k = 1, block(b) % nPkt(3)
+      do k = 1, block(b) % nCell(3)
          do j = 1, block(b) % nCell(2)
             do i = 1, block(b) % nPkt(1)
                UR = block(b) % Q(i,j,k,:)
                UL = block(b) % Q(i-1,j,k,:)
-
 
                flux = 0.5E0_dp * (UR + UL)
                rho = flux(1)
@@ -52,18 +48,21 @@ subroutine calc_fluxes()
 
                block(b) % Flux(i,j,k,:,1) = flux
 
-!               if (iteration == 16) then
-!                  write(*,*) i,j
-!                  write(*,*) UR
-!                  write(*,*) UL
-!                  block(b) % Flux(i,j,k,:,1) = - Rotated_RHLL(UL,UR,1.0E0_dp,0.0E0_dp,1)
-!               end if
-               block(b) % Flux(i,j,k,:,1) = - Rotated_RHLL(UL,UR,1.0E0_dp,0.0E0_dp,0)
-!               if (j == 1) then
-!!                 write(*,'(I0,3(ES10.3))',ADVANCE="NO") i,UL(1), UR(1),rho
-!                  write(*,'(I0,8(ES10.3))') i,flux,block(b) % Flux(i,j,k,:,1)
-!               end if
-!               write(*,*) i,j,flux(2),rho
+               block(b) % Flux(i,j,k,:,1) = - Rotated_RHLL(UL,UR  &
+                                             ,block(b) % Edge_Vec(:,i,j,k,1)) &
+                                          *   block(b) % Edge_Len(i,j,k,1)
+            end do
+         end do
+      end do
+      do k = 1, block(b) % nCell(3)
+         do j = 1, block(b) % nPkt(2)
+            do i = 1, block(b) % nCell(1)
+               UR = block(b) % Q(i,j,k,:)
+               UL = block(b) % Q(i,j-1,k,:)
+
+               block(b) % Flux(i,j,k,:,2) = - Rotated_RHLL(UL,UR  &
+                                             ,block(b) % Edge_Vec(:,i,j,k,2)) &
+                                          *   block(b) % Edge_Len(i,j,k,2)
             end do
          end do
       end do
@@ -95,15 +94,12 @@ contains
 !*
 !* Katate Masatsuka, February 2010. http://www.cfdbooks.com
 !*****************************************************************************
- function Rotated_RHLL(uL, uR, nx, ny,debug)
+ function Rotated_RHLL(uL, uR, vec)
  use const, only : dp
  implicit none
  real(kind = dp) :: uL(4), uR(4)    !  Input: conservative variables rho*[1, u, v, E]
- real(kind = dp) :: nx, ny          !  Input: face normal vector, [nx, ny] (Left-to-Right)
+ real(kind = dp) :: vec(2)             !  Input: face normal vector, [nx, ny] (Left-to-Right)
  real(kind = dp) :: Rotated_RHLL(4) ! Output: Rotated_RHLL flux function.
- integer :: debug
-
-
 
 !Local constants
  real(kind = dp) :: gamma                          ! Ratio of specific heat.
@@ -125,9 +121,12 @@ contains
  real(kind = dp) :: SRp,SLm                        ! Wave speeds for the HLL part
  real(kind = dp) :: fL(4), fR(4), diss(4)          ! Fluxes ad dissipation term
  real(kind = dp) :: temp
+ real(kind = dp) :: nx, ny
  integer :: i, j
 
 !Constants.
+     nx = vec(1)
+     ny = vec(2)
      gamma = 1.4E0_dp
       zero = 0.0E0_dp
      fifth = 0.2E0_dp
@@ -149,7 +148,6 @@ contains
      vxR = uR(2)/uR(1)
      vyR = uR(3)/uR(1)
       pR = (gamma-one)*( uR(4) - half*rhoR*(vxR*vxR+vyR*vyR) )
-      if(debug == 1) write(*,*)gamma,pR,rhoR
       aR = sqrt(gamma*pR/rhoR)
       HR = ( uR(4) + pR ) / rhoR
 
