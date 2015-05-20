@@ -1,11 +1,12 @@
-#SUBDIRS = airfoil
-SUBDIRS := ${shell find ./*  -maxdepth 0 -type d -print }
+SUBDIRS = sod_xdir sod_ydir
+#SUBDIRS := ${shell find ./*  -maxdepth 0 -type d -print }
 SUBCLEAN = $(addsuffix .clean,$(SUBDIRS))
 .PHONY: subdirs $(SUBDIRS) clean $(SUBCLEAN)
  
 subdirs: $(SUBDIRS)
 
-clean:  $(SUBCLEAN)
+clean:  $(SUBCLEAN) 
+	@rm -vf *.o *.mod *.ufo *.dat *.plt *.png *.vtk *.txt *.bin gridgen *.silo *.dx stubex
 
 test:
 	@echo $(SUBCLEAN)

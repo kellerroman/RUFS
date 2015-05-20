@@ -16,7 +16,10 @@ all: cmp run
 cmp:
 	@$(MAKE) -C $(HOMEDIR) --no-print-directory
 
-stubex: stubex.f
+str.dx: ../stubex
+	@./$<
+	
+../stubex: ../stubex.f
 	@$(FC) $(CFLAGS) $< -o $@
 
 
@@ -27,9 +30,6 @@ run: git.bin str.dx
 	@$(HOMEDIR)bin/extract_1D
 
 git.bin: gridgen
-	@./$<
-	
-str.dx: stubex
 	@./$<
 	
 gridgen: gridgen.F90
