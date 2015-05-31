@@ -25,9 +25,6 @@ subroutine calc_fluxes()
 !  physical_flux(2) = (density*velocity)* velocity + pressure
 !  physical_flux(3) =          enthalpy * velocity
 
-
-
-
    do b = 1,nBlock
       do k = 1, block(b) % nCell(3)
          do j = 1, block(b) % nCell(2)
@@ -35,22 +32,14 @@ subroutine calc_fluxes()
                UR = block(b) % Q(i,j,k,:)
                UL = block(b) % Q(i-1,j,k,:)
 
-               flux = 0.5E0_dp * (UR + UL)
-               rho = flux(1)
-               u = flux(2) / rho
-               v = flux(3) / rho
-               velsq = u*u+v*v
+               if ( control_riemann_solver == 1) then
+                  block(b) % Flux(i,j,k,:,1) = - Rotated_RHLL(UL, UR, block(b) % Edge_Vec(:,i,j,k,1))
+               else if ( control_riemann_solver == 2) then
+                  block(b) % Flux(i,j,k,:,1) = - Roe(UL, UR, block(b) % Edge_Vec(:,i,j,k,1))
+               end if
 
-               p = gam1 * (flux(4) - 0.5E0_dp * rho * velsq)
+               block(b) % Flux(i,j,k,:,1) = block(b) % Flux(i,j,k,:,1) * block(b) % Edge_Len(i,j,k,1)
 
-               flux = flux * u
-               flux(2) = flux(2) + p
-
-               block(b) % Flux(i,j,k,:,1) = flux
-
-               block(b) % Flux(i,j,k,:,1) = - Rotated_RHLL(UL,UR  &
-                                             ,block(b) % Edge_Vec(:,i,j,k,1)) &
-                                          *   block(b) % Edge_Len(i,j,k,1)
             end do
          end do
       end do
@@ -60,23 +49,170 @@ subroutine calc_fluxes()
                UR = block(b) % Q(i,j,k,:)
                UL = block(b) % Q(i,j-1,k,:)
 
-               block(b) % Flux(i,j,k,:,2) = - Rotated_RHLL(UL,UR  &
-                                             ,block(b) % Edge_Vec(:,i,j,k,2)) &
-                                          *   block(b) % Edge_Len(i,j,k,2)
+               if ( control_riemann_solver == 1) then
+                  block(b) % Flux(i,j,k,:,2) = - Rotated_RHLL(UL, UR, block(b) % Edge_Vec(:,i,j,k,2))
+               else if ( control_riemann_solver == 2) then
+                  block(b) % Flux(i,j,k,:,2) = - Roe(UL, UR, block(b) % Edge_Vec(:,i,j,k,2))
+               end if
+
+               block(b) % Flux(i,j,k,:,2) =block(b) % Flux(i,j,k,:,2) * block(b) % Edge_Len(i,j,k,2)
+
             end do
          end do
       end do
    end do
-!      do d1 = 1,2
-!         do d2 = 1,2
-!            met(d1,d2) = 0.5e0_dp * (block(b) %
-!         end do
-!      end do
-
 
 contains
 
-!*****************************************************************************
+function AUSM(uL,uR,vec)
+use const, only : dp
+implicit none
+ real(kind = dp) :: uL(4), uR(4)    !  Input: conservative variables rho*[1, u, v, E]
+ real(kind = dp) :: vec(2)             !  Input: face normal vector, [nx, ny] (Left-to-Right)
+ real(kind = dp) :: AUSM (4) ! Output: AUSM  flux function.
+
+end function AUSM
+
+!****************************************************************
+!* -- Roe's Flux Function ---
+!*
+!* P. L. Roe, Approximate Riemann Solvers, Parameter Vectors and Difference
+!* Schemes, Journal of Computational Physics, 43, pp. 357-372.
+!*
+!* Katate Masatsuka, February 2009. http://www.cfdbooks.com
+!****************************************************************
+ function Roe(uL, uR,vec)
+use const, only : dp
+implicit none
+ real(kind = dp) :: uL(4), uR(4) !  Input: conservative variables rho*[1, u, v, E]
+ real(kind = dp) :: vec(2)             !  Input: face normal vector, [nx, ny] (Left-to-Right)
+ real(kind = dp) :: Roe(4)       ! Output: Roe flux function (upwind)
+!Local constants
+ real(kind = dp) :: nx, ny       !  Input: face normal vector, [nx, ny] (Left-to-Right)
+ real(kind = dp) :: gamma                          ! Ratio of specific heat.
+ real(kind = dp) :: zero, fifth, half, one, two    ! Numbers
+!Local variables
+ real(kind = dp) :: tx, ty       ! Tangent vector (perpendicular to the face normal)
+ real(kind = dp) :: vxL, vxR, vyL, vyR             ! Velocity components.
+ real(kind = dp) :: rhoL, rhoR, pL, pR             ! Primitive variables.
+ real(kind = dp) :: vnL, vnR, vtL, vtR             ! Normal and tangent velocities
+ real(kind = dp) :: aL, aR, HL, HR                 ! Speeds of sound.
+ real(kind = dp) :: RT,rho,vx,vy,H,a,vn, vt        ! Roe-averages
+ real(kind = dp) :: drho,dvx,dvy,dvn,dvt,dpr,dV(4)  ! Wave strenghs
+ real(kind = dp) :: ws(4),dws(4), Rv(4,4)          ! Wave speeds and right-eigevectors
+ real(kind = dp) :: fL(4), fR(4), diss(4)          ! Fluxes ad dissipation term
+ integer :: i, j
+     nx = vec(1)
+     ny = vec(2)
+!Constants.
+     gamma = 1.4
+      zero = 0.0
+     fifth = 0.2
+      half = 0.5
+       one = 1.0
+       two = 2.0
+
+!Tangent vector (Do you like it? Actually, Roe flux can be implemented
+! without any tangent vector. See "I do like CFD, VOL.1" for details.)
+  tx = -ny
+  ty = nx
+!Primitive and other variables.
+!  Left state
+    rhoL = uL(1)
+     vxL = uL(2)/uL(1)
+     vyL = uL(3)/uL(1)
+     vnL = vxL*nx+vyL*ny
+     vtL = vxL*tx+vyL*ty
+      pL = (gamma-one)*( uL(4) - half*rhoL*(vxL*vxL+vyL*vyL) )
+      aL = sqrt(gamma*pL/rhoL)
+      HL = ( uL(4) + pL ) / rhoL
+!  Right state
+    rhoR = uR(1)
+     vxR = uR(2)/uR(1)
+     vyR = uR(3)/uR(1)
+     vnR = vxR*nx+vyR*ny
+     vtR = vxR*tx+vyR*ty
+      pR = (gamma-one)*( uR(4) - half*rhoR*(vxR*vxR+vyR*vyR) )
+      aR = sqrt(gamma*pR/rhoR)
+      HR = ( uR(4) + pR ) / rhoR
+!First compute the Roe Averages
+    RT = sqrt(rhoR/rhoL)
+   rho = RT*rhoL
+    vx = (vxL+RT*vxR)/(one+RT)
+    vy = (vyL+RT*vyR)/(one+RT)
+     H = ( HL+RT* HR)/(one+RT)
+     a = sqrt( (gamma-one)*(H-half*(vx*vx+vy*vy)) )
+    vn = vx*nx+vy*ny
+    vt = vx*tx+vy*ty
+!Wave Strengths
+   drho = rhoR - rhoL
+     dpr =   pR - pL
+    dvn =  vnR - vnL
+    dvt =  vtR - vtL
+
+  dV(1) = (dpr - rho*a*dvn )/(two*a*a)
+  dV(2) = rho*dvt/a
+  dV(3) =  drho - dpr/(a*a)
+  dV(4) = (dpr + rho*a*dvn )/(two*a*a)
+
+!Wave Speed
+  ws(1) = abs(vn-a)
+  ws(2) = abs(vn)
+  ws(3) = abs(vn)
+  ws(4) = abs(vn+a)
+
+!Harten's Entropy Fix JCP(1983), 49, pp357-393:
+! only for the nonlinear fields.
+  dws(1) = fifth
+   if ( ws(1) < dws(1) ) ws(1) = half * ( ws(1)*ws(1)/dws(1)+dws(1) )
+  dws(4) = fifth
+   if ( ws(4) < dws(4) ) ws(4) = half * ( ws(4)*ws(4)/dws(4)+dws(4) )
+
+!Right Eigenvectors
+  Rv(1,1) = one
+  Rv(2,1) = vx - a*nx
+  Rv(3,1) = vy - a*ny
+  Rv(4,1) =  H - vn*a
+
+  Rv(1,2) = zero
+  Rv(2,2) = a*tx
+  Rv(3,2) = a*ty
+  Rv(4,2) = vt*a
+
+  Rv(1,3) = one
+  Rv(2,3) = vx
+  Rv(3,3) = vy
+  Rv(4,3) = half*(vx*vx+vy*vy)
+
+  Rv(1,4) = one
+  Rv(2,4) = vx + a*nx
+  Rv(3,4) = vy + a*ny
+  Rv(4,4) =  H + vn*a
+
+!Dissipation Term
+  diss = zero
+  do i=1,4
+   do j=1,4
+    diss(i) = diss(i) + ws(j)*dV(j)*Rv(i,j)
+   end do
+  end do
+
+!Compute the flux.
+  fL(1) = rhoL*vnL
+  fL(2) = rhoL*vnL * vxL + pL*nx
+  fL(3) = rhoL*vnL * vyL + pL*ny
+  fL(4) = rhoL*vnL *  HL
+
+  fR(1) = rhoR*vnR
+  fR(2) = rhoR*vnR * vxR + pR*nx
+  fR(3) = rhoR*vnR * vyR + pR*ny
+  fR(4) = rhoR*vnR *  HR
+
+  Roe = half * (fL + fR - diss)
+
+ end function Roe
+
+!****************************************************************
 !* -- Rotated-Roe-HLL Flux Function ---
 !*
 !* H. Nishikawa and K. Kitamura, Very Simple, Carbuncle-Free, Boundary-Layer
@@ -93,7 +229,7 @@ contains
 !*     It shouldn't be difficult for you to implement it.
 !*
 !* Katate Masatsuka, February 2010. http://www.cfdbooks.com
-!*****************************************************************************
+!****************************************************************
  function Rotated_RHLL(uL, uR, vec)
  use const, only : dp
  implicit none
@@ -179,6 +315,12 @@ contains
     nx1 = -ny
     ny1 =  nx
   endif
+
+       nx2  = nx
+       ny2 = ny
+       nx1 = -ny
+       ny1 = nx
+
     alpha1 = nx * nx1 + ny * ny1
 !   To make alpha1 always positive.
       temp = sign(one,alpha1)
@@ -189,6 +331,12 @@ contains
 ! Take n2 as perpendicular to n1.
        nx2 = -ny1
        ny2 =  nx1
+
+       nx2  = nx
+       ny2 = ny
+       nx1 = -ny
+       ny1 = nx
+
     alpha2 = nx * nx2 + ny * ny2
 !   To make alpha2 always positive.
       temp = sign(one,alpha2)

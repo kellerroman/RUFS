@@ -1,8 +1,8 @@
 program gridgen
 implicit none
 
-integer, parameter :: imax = 21
-integer, parameter :: jmax = 3
+integer, parameter :: imax = 101
+integer, parameter :: jmax = 101
 integer, parameter :: fu_git = 99
 integer, parameter :: Version = 1000
 INTEGER, PARAMETER :: ioout = 10

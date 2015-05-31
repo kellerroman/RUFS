@@ -71,7 +71,7 @@ type :: tblock
    !<  i+1 West ist Ost, j+1 Süd ist Nord, k+1 Back ist Front
 
    real(kind=dp),allocatable :: Edge_Vec (:,:,:,:,:)
-   !< Normalenvektor der Edge (I,J,K, EDGE_DIR, COORD)
+   !< Normalenvektor der Edge ( COORD,I,J,K, EDGE_DIR)
    !< Richtung ist für Ost&Süd Vektoren richtig, West&Nord muss mit -1 multipliziert werden.
    !< EDGE_DIR: 1 ist in i-Richtung (West&Ost), 2 ist in j-Richtung (Süd&Nord),...
    !< COORD gibt X,y,z wert an

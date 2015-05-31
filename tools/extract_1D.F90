@@ -5,7 +5,6 @@ program extract_1D
    integer, parameter :: fu = 99
    integer, parameter :: fo = 101
 
-   integer :: arg_count
    character(len = 100) :: arg
    character(len = 100) :: sol_file
    character(len = 100) :: git_file
@@ -26,13 +25,33 @@ program extract_1D
    integer :: nBCC_out(3,2)
    !< Gibt die Ausgeschriebenen Randzellen an
    integer :: b,var,i,j
+
+   integer :: var_dir
+   !< Welche Richtung soll variert werden
+
+   integer :: istart,iend
+   integer :: jstart,jend
+
+   var_dir = 1
    sol_file = "sol.bin"
    git_file = "git.bin"
    out_file = "extract_1dXXXXXX.dat"
-
+   write(*,*)
    call wr("Extract 1D",1)
+    i = 1
+    DO
+        CALL get_command_argument(i, arg)
+        IF (LEN_TRIM(arg) == 0) EXIT
+        if (trim(arg) == "x") then
+            var_dir = 1
+        else if (trim(arg) == "y") then
+            var_dir = 2
+        else if (trim(arg) == "xy") then
+            var_dir = 3
+        end if
+        i = i+1
+    END DO
 
-   arg_count=command_argument_count()
    open( unit = fu , file = trim(sol_file)                             &
        , form = "unformatted", access = "stream", status = "old")
 
@@ -177,12 +196,26 @@ do
          do var = 1, nVar
             write(fo,'(",",A)',advance="no") trim(varname(var))
          end do
-         j = block(b) %  nCell(2)/2
         write(arg,'("(I3,",I0,"("","",F20.12))")') nVar+1
         write(fo,*)
+        if (var_dir == 1) then
+         j = block(b) %  nCell(2)/2
          do i = 1,block(b) %  nCell(1)
             write(fo,arg) i-nBCC_out(1,1),DBLE(i-nBCC_out(1,1)),(block(b) % Q(i,j,1,var),var=1,nVar)
          end do
+         else if (var_dir == 2) then
+         i = block(b) %  nCell(1)/2
+         do j = 1,block(b) %  nCell(2)
+            write(fo,arg) j-nBCC_out(2,1),DBLE(j-nBCC_out(2,1)),(block(b) % Q(i,j,1,var),var=1,nVar)
+         end do
+         else if (var_dir == 3) then
+
+         do j = 1,min(block(b) %  nCell(1),block(b) %  nCell(2))
+            i = j
+            write(fo,arg) j-nBCC_out(2,1),DBLE(j-nBCC_out(2,1)),(block(b) % Q(i,j,1,var),var=1,nVar)
+         end do
+
+         end if
          close (fo)
       end do !b = 1, nBlock
 

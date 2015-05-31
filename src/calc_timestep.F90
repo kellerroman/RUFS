@@ -12,8 +12,9 @@ subroutine calc_timestep
    real(kind=dp) :: us, vs, ce, sq, p, rho, dt
 
    do b = 1, nBlock
-      if (const_dt) then
+      if (control_dt_method == 1) then
          block(b) % dt = control_timestep
+         time  = time + control_timestep
       else
          do k= 1, block(b) % nCell(3)
             do j= 1, block(b) % nCell(2)
@@ -28,6 +29,8 @@ subroutine calc_timestep
                   p  = (0.4E0_dp) * (block(b)%Q(i,j,k,4)                               &
                      -  0.5E0_dp  *  rho * (block(b)%Q(i,j,k,2) * block(b)%Q(i,j,k,2)  &
                      + block(b)%Q(i,j,k,3) * block(b)%Q(i,j,k,3)) )
+                  if (rho<=0 .or. p<0) &
+                  write(*,*) i,j,k,rho,p
                   ce = sqrt( 1.4E0_dp * p / rho )
                   block(b) % dt(i,j,k) = control_CFL / ( us + vs + ce &
                      * sqrt( block(b)%metric2(i,j,k,1,1) * block(b)%metric2(i,j,k,1,1) &
@@ -45,9 +48,8 @@ subroutine calc_timestep
       end if
    end do
 
-   if (const_dt) then
+   if (control_dt_method == 3) then
       dt_min = 1E10_dp
-
       !!!MIN dt aller blöcke finden
       do b = 1, nBlock
          dt_min = min(dt_min,minval(block(b) % dt))
@@ -56,7 +58,7 @@ subroutine calc_timestep
       do b = 1, nBlock
          block(b) % dt = dt_min
       end do
-
       time  = time + dt_min
    end if
+
 end subroutine calc_timestep

@@ -28,6 +28,7 @@ run: git.bin str.dx
 	@$(PRE_CONFIG)
 	@$(PROGRAM) #-debug
 	@$(HOMEDIR)bin/extract_1D x
+	@$(HOMEDIR)bin/sol2visit
 
 git.bin: gridgen
 	@./$<

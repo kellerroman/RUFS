@@ -39,11 +39,10 @@ subroutine calc_metrices()
                                             + ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
                                             * ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) )
                ! Normalenvector ist dx = y2-y1
-               block(b) % Edge_Vec(1,i,j,k,1) = ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+               block(b) % Edge_Vec(1,i,j,k,1) = - ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
                                               / block(b) % Edge_Len(i,j,k,1)
-               block(b) % Edge_Vec(2,i,j,k,1) = - ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
+               block(b) % Edge_Vec(2,i,j,k,1) = + ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
                                               / block(b) % Edge_Len(i,j,k,1)
-
             end do
          end do
       end do
@@ -57,18 +56,24 @@ subroutine calc_metrices()
                                             + ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
                                             * ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) )
                ! Normalenvector ist dx = y2-y1
-               block(b) % Edge_Vec(1,i,j,k,2) = ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+               block(b) % Edge_Vec(1,i,j,k,2) = - ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
                                               / block(b) % Edge_Len(i,j,k,2)
-               block(b) % Edge_Vec(2,i,j,k,2) = - ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
+               block(b) % Edge_Vec(2,i,j,k,2) = + ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
                                               / block(b) % Edge_Len(i,j,k,2)
 
             end do
          end do
       end do
 
+!      i =50
+!      j= 2
+!      k = 1
+!      write(*,*) block(b) % edge_len(i-1,j,k,1) ,block(b) % edge_len(i,j,k,1) &
+!      ,block(b) % edge_len(i,j-1,k,2) ,block(b) % edge_len(i,j,k,2)
+!      write(*,*) block(b) % edge_Vec(:,i-1,j,k,1) ,block(b) % edge_Vec(:,i,j,k,1) &
+!      ,block(b) % edge_Vec(:,i,j-1,k,2) ,block(b) % edge_Vec(:,i,j,k,2)
+!      stop
 
-
-      
       do f = 1,nFaces
 
          call loop_indices_for_bc_faces(f,b                          &

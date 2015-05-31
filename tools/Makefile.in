@@ -44,9 +44,8 @@ $(EXECUTABLE_DIR)/% : %.F90	write_screen.o const.o types.o
 	$(FC) $(CFLAGS) $^ -o $@
 	
 $(EXECUTABLE_DIR)/sol2visit : sol2visit.F90	write_screen.o const.o types.o
-	$(FC) $(CFLAGS) $^ -o $@ -I/usr/local/silo/include \
+	$(FC) $(CFLAGS) $^ -o $@  \
 							 -I/usr/include  \
-							 -L/usr/local/silo/lib \
 							 -L/usr/lib64 \
 	 						 -lsiloh5 -lhdf5 -lsz -lm -lz -lstdc++ 
 	 						 

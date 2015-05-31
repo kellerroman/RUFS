@@ -1,4 +1,4 @@
-SUBDIRS = sod_xdir sod_ydir
+SUBDIRS = sod_xdir sod_ydir sod_dia sod_idir
 #SUBDIRS := ${shell find ./*  -maxdepth 0 -type d -print }
 SUBCLEAN = $(addsuffix .clean,$(SUBDIRS))
 .PHONY: subdirs $(SUBDIRS) clean $(SUBCLEAN)

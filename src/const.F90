@@ -16,7 +16,7 @@ integer, parameter :: FRONT_FACE          = 6
 integer, parameter ::    BC_WALL          = -1
 integer, parameter ::    BC_INFLOW        = -2
 integer, parameter ::    BC_OUTFLOW       = -3
-integer, parameter ::    BC_SYMMERTIE     = -4
+integer, parameter ::    BC_SYMMETRY     = -4
 
 integer, parameter ::    isothermal_Wall  = 1
 integer, parameter ::     adiabatic_Wall  = 2
@@ -50,6 +50,8 @@ character ( len = 2 ), parameter :: marker_prefix = "$%"
 !character ( len = 4 ), parameter :: marker_suffix = "$"//CHAR(13)//CHAR(11)//CHAR (0) !!! MAKES THE SOL_FILE LITTLE READABLE IN ASCII (CAT)
 character ( len = 1 ), parameter :: marker_suffix = "$"
 
+character ( len = 4 ), parameter :: string_Riemann_Solver(3) = (/"RHLL","Roe ","AUSM"/)
+character ( len = 9 ), parameter :: string_dt_solver(3) = (/"given dt ","given cfl","calc  dt "/)
 integer, parameter :: io_marker_len = len(marker_prefix)+1+len(marker_suffix)
 
 character ( len = io_marker_len ), parameter :: io_marker_file_start           = marker_prefix//"f"//marker_suffix

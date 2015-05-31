@@ -25,11 +25,30 @@ integer                             :: control_bc_cells_out
 !< 0: not outputted
 !< 1: outputted
 integer                             :: control_dimension
+!< Gibt die Art der Simulation an
+!< 1 : 2D Simulation
+!< 2 : 2D Rotationssymmetrisch e Simulation
+!< 3 : 3D Simulation
+integer                             :: control_riemann_solver
+!< Gibt die Riemann Löser an
+!< 1 : RHLL
+!< 2 : Roe
+!< 3 : AUSM
 real(kind=dp)                       :: control_CFL
 real(kind=dp)                       :: control_timestep
+integer                             :: control_equation
+!< Gibt das Physikalische Modell an:
+!< 1: Euler - Gleichung
+!< 2: Navier-Stokes
+!< [ 3: Wärmeleitung ]
 
+integer :: control_dt_method
+!< Gibt an wie der Zeitschritt berechnet wird:
+!< 1: Es wird ein vorgegebener Zeitschritt verwendet
+!< 2: Es wird mittels einer CFL Nummer ein Lokaler Zeitschritt in jeder Zelle berechnet
+!< 3: Es wird mittels einer CFL Nummer ein Lokaler Zeitschritt in jeder Zelle berechnet,
+!<     und alle Zellen verwenden den kleinsten Zeitschritt aller Zellen
 
-logical :: const_dt
 !!! CALCULATED VARIABLES 
 integer :: n_BC_Cells
 

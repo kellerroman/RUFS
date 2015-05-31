@@ -1,6 +1,6 @@
 FC=gfortran
 
-HOMEDIR=../../../
+HOMEDIR=../../
 
 CFLAGS += -O3
 CFLAGS += -fbounds-check -fcheck-array-temporaries -Wall
@@ -16,23 +16,14 @@ all: cmp run
 cmp:
 	@$(MAKE) -C $(HOMEDIR) --no-print-directory
 
-str.dx: ../stubex
-	@./$<
-	
-../stubex: ../stubex.f
-	@$(FC) $(CFLAGS) $< -o $@
-
-
-run: git.bin str.dx
+run: git.bin
 	@echo 'Running Grid-Adaper on simple Chamber'
 	@$(PRE_CONFIG)
 	@$(PROGRAM) #-debug
-	@$(HOMEDIR)bin/extract_1D x
+	@$(HOMEDIR)bin/sol2visit
 
 git.bin: gridgen
 	@./$<
-	
-
 	
 gridgen: gridgen.F90
 	@$(FC) $(CFLAGS) $< -o $@

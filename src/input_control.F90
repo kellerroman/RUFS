@@ -3,20 +3,16 @@ use control
 use global
 implicit none
 integer, parameter :: fu = 111
-integer, parameter :: cfg_version = 1
-integer :: t, version, equation
+integer, parameter :: cfg_version = 2
+integer :: t, version
 logical :: fexists
 
 iteration = 0
 time = 0.0E0_dp
 sol_out_nVar = 0
 
-const_dt = .true.
 write_sol_header = .true.
 control_bc_cells_out = 0
-
-
-
 
 inquire(file=trim(file_cfg_in),exist=fexists)
 
@@ -33,10 +29,19 @@ if (version /= cfg_version) then
 end if
 
 read(fu)   control_num_iteration,control_sol_out,control_res_out &
-          ,equation,control_dimension, space_disc, space_order, control_CFL &
+          ,control_equation,control_dimension, space_disc, space_order &
+          ,control_dt_method, control_riemann_solver,control_CFL &
           ,control_timestep
 
-if ( equation == 1 .and. control_dimension <= 2 ) then
+call wr("CONFIG INFORMATION",2)
+write(*,'(A40," = ",I0)') "Number of Iterations", control_num_iteration
+write(*,'(A40," = ",I0)') "Output Solution", control_sol_out
+write(*,'(A40," = ",I0)') "Output Residual", control_res_out
+write(*,'(A40," = ",A)') "Riemann Solver", string_Riemann_Solver(control_riemann_solver)
+write(*,'(A40," = ",A)') "Time Integration Theme",string_dt_solver(control_dt_method)
+write(*,'(A40," = ",ES10.4)') "Timestep",control_timestep
+
+if ( control_equation == 1 .and. control_dimension <= 2 ) then
    nVar = 4
    sol_out_nVar = sol_out_nVar + 4
 end if
@@ -49,7 +54,7 @@ end if
 
 t = 1
 allocate ( VarName ( sol_out_nVar ) )
-if ( equation == 1 .and. control_dimension <= 2 ) then
+if ( control_equation == 1 .and. control_dimension <= 2 ) then
    VarName(t) = VarName_Rho; t = t + 1
    VarName(t) = VarName_SpU; t = t + 1
    VarName(t) = VarName_SpV; t = t + 1

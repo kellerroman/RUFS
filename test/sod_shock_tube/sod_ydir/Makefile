@@ -27,7 +27,7 @@ run: git.bin str.dx
 	@echo 'Running Grid-Adaper on simple Chamber'
 	@$(PRE_CONFIG)
 	@$(PROGRAM) #-debug
-	@$(HOMEDIR)bin/extract_1D
+	@$(HOMEDIR)bin/extract_1D y
 
 git.bin: gridgen
 	@./$<
