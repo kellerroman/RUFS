@@ -39,6 +39,44 @@ subroutine calc_metrices()
                                             + ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
                                             * ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) )
                ! Normalenvector ist dx = y2-y1
+               block(b) % Edge_Vec(1,i,j,k,1) = ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+                                              / block(b) % Edge_Len(i,j,k,1)
+               block(b) % Edge_Vec(2,i,j,k,1) = - ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
+                                              / block(b) % Edge_Len(i,j,k,1)
+
+            end do
+         end do
+      end do
+
+      do k = 1,block(b) % nCell(3)
+         do j = 1,block(b) % nPkt(2)
+            do i = 1,block(b) % nCell(1)
+               block(b) % Edge_Len(i,j,k,2) = sqrt ( &
+                                              ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
+                                            * ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
+                                            + ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+                                            * ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) )
+               ! Normalenvector ist dx = y2-y1
+               block(b) % Edge_Vec(1,i,j,k,2) = ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+                                              / block(b) % Edge_Len(i,j,k,2)
+               block(b) % Edge_Vec(2,i,j,k,2) = - ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
+                                              / block(b) % Edge_Len(i,j,k,2)
+
+            end do
+         end do
+      end do
+
+
+
+      do k = 1,block(b) % nCell(3)
+         do j = 1,block(b) % nCell(2)
+            do i = 1,block(b) % nPkt(1)
+               block(b) % Edge_Len(i,j,k,1) = sqrt ( &
+                                              ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
+                                            * ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
+                                            + ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
+                                            * ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) )
+               ! Normalenvector ist dx = y2-y1
                block(b) % Edge_Vec(1,i,j,k,1) = - ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
                                               / block(b) % Edge_Len(i,j,k,1)
                block(b) % Edge_Vec(2,i,j,k,1) = + ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&

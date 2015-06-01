@@ -5,6 +5,7 @@ program extract_1D
    integer, parameter :: fu = 99
    integer, parameter :: fo = 101
 
+   integer :: arg_count
    character(len = 100) :: arg
    character(len = 100) :: sol_file
    character(len = 100) :: git_file

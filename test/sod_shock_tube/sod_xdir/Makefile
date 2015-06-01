@@ -32,7 +32,8 @@ run: git.bin str.dx
 git.bin: gridgen
 	@./$<
 	
-
+str.dx: stubex
+	@./$<
 	
 gridgen: gridgen.F90
 	@$(FC) $(CFLAGS) $< -o $@
