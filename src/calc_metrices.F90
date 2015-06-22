@@ -30,6 +30,7 @@ subroutine calc_metrices()
             end do
          end do
       end do
+
       do k = 1,block(b) % nCell(3)
          do j = 1,block(b) % nCell(2)
             do i = 1,block(b) % nPkt(1)
@@ -43,48 +44,13 @@ subroutine calc_metrices()
                                               / block(b) % Edge_Len(i,j,k,1)
                block(b) % Edge_Vec(2,i,j,k,1) = - ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
                                               / block(b) % Edge_Len(i,j,k,1)
-
+!               if (i == 24) then
+!                  write(*,*) j,block(b) % Edge_Vec(:,i,j,k,1),block(b) % xyz(i  ,j+1,k  ,2) , block(b) % xyz(i  ,j  ,k  ,2)&
+!                  ,block(b) % Edge_Len(i,j,k,1)
+!                  end if
             end do
          end do
       end do
-
-      do k = 1,block(b) % nCell(3)
-         do j = 1,block(b) % nPkt(2)
-            do i = 1,block(b) % nCell(1)
-               block(b) % Edge_Len(i,j,k,2) = sqrt ( &
-                                              ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
-                                            * ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
-                                            + ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
-                                            * ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) )
-               ! Normalenvector ist dx = y2-y1
-               block(b) % Edge_Vec(1,i,j,k,2) = ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
-                                              / block(b) % Edge_Len(i,j,k,2)
-               block(b) % Edge_Vec(2,i,j,k,2) = - ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
-                                              / block(b) % Edge_Len(i,j,k,2)
-
-            end do
-         end do
-      end do
-
-
-
-      do k = 1,block(b) % nCell(3)
-         do j = 1,block(b) % nCell(2)
-            do i = 1,block(b) % nPkt(1)
-               block(b) % Edge_Len(i,j,k,1) = sqrt ( &
-                                              ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
-                                            * ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1)) &
-                                            + ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
-                                            * ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) )
-               ! Normalenvector ist dx = y2-y1
-               block(b) % Edge_Vec(1,i,j,k,1) = - ( block(b) % xyz(i  ,j+1,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
-                                              / block(b) % Edge_Len(i,j,k,1)
-               block(b) % Edge_Vec(2,i,j,k,1) = + ( block(b) % xyz(i  ,j+1,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
-                                              / block(b) % Edge_Len(i,j,k,1)
-            end do
-         end do
-      end do
-
       do k = 1,block(b) % nCell(3)
          do j = 1,block(b) % nPkt(2)
             do i = 1,block(b) % nCell(1)
@@ -96,12 +62,29 @@ subroutine calc_metrices()
                ! Normalenvector ist dx = y2-y1
                block(b) % Edge_Vec(1,i,j,k,2) = - ( block(b) % xyz(i+1,j  ,k  ,2) - block(b) % xyz(i  ,j  ,k  ,2)) &
                                               / block(b) % Edge_Len(i,j,k,2)
-               block(b) % Edge_Vec(2,i,j,k,2) = + ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
+               block(b) % Edge_Vec(2,i,j,k,2) = ( block(b) % xyz(i+1,j  ,k  ,1) - block(b) % xyz(i  ,j  ,k  ,1))&
                                               / block(b) % Edge_Len(i,j,k,2)
 
             end do
          end do
       end do
+
+!      do k = 1,block(b) % nCell(3)
+!         do j = 1,block(b) % nCell(2)
+!            do i = 1,block(b) % nCell(1)
+!               write(*,'(3(I4,1X),15(F8.5,1X))') i,j,k &
+!               ,block(b) % schwerpunkt(i,j,k,:) &
+!               ,1.0E0_dp / block(b) % Area(i,j,k) &
+!               ,block(b) % Edge_Len(i,j,k,:) &
+!               ,block(b) % Edge_Vec(:,i,j,k,1)&
+!               ,block(b) % Edge_Vec(:,i+1,j,k,1)&
+!               ,block(b) % Edge_Vec(:,i,j,k,2)&
+!               ,block(b) % Edge_Vec(:,i,j+1,k,2)
+!            end do
+!!         stop
+!         end do
+!      end do
+!      stop
 
 !      i =50
 !      j= 2
@@ -140,83 +123,87 @@ subroutine calc_metrices()
 
       !!! ECKPUNKTE
       if (Dimen > 2) call error("3D NOCH NICHT IMPLEMENTIERT ECKPUNKTE",__FILE__,__LINE__)
-      if (n_BC_Cells > 1) call error ("n_BC_CELLS >1 für ECKPUNKTE NICHT IMPLEMENTIERT",__FILE__,__LINE__)
-
-      k = 1
-      do f = 1, nCorners
-         if (f == 1 .or. f == 4 .or. f == 5 .or. f == 7) then
-            i = 0
-            idir = 1
-         else
-            i = block(b)%nCell(1)+1 !n_BC_Cells
-            idir = -1
-         end if
-
-         if (f == 1 .or. f == 2 .or. f == 5 .or. f == 6) then
-            j = 0
-         else
-            j = block(b)%nCell(2)+1 !n_BC_Cells
-         end if
-         block(b) % schwerpunkt(i,j,k,:) = 2.0D0 &
-                                         * block(b) % schwerpunkt(i+idir  ,j,k,:) &
-                                         - block(b) % schwerpunkt(i+idir*2,j,k,:)
-
-      end do !f = 1, nCorners
-
-
-
-
-      !do k = 1-n_BC_Cells, block(b)%nCell(3)+n_BC_Cells
-       k = 1
-         nlv(3) = k
-         do j = 1-n_BC_Cells, block(b)%nCell(2)+n_BC_Cells
-            nlv(2) = j
-            do i = 1-n_BC_Cells, block(b)%nCell(1)+n_BC_Cells
-               nlv(1) = i
-               do d1 = 1, Dimen ! physikalische Dimensionen x,y,z
-                  do d2 = 1,Dimen  ! Gitter dimensionen i,j,k eta xi phi
-                     ndir = 0
-                     ndir(d2) = 1
-                     if (nlv(d2) == 1-n_BC_Cells) then
-
-                        block(b) % metric1 (i,j,k,d1,d2) = 0.5E0_dp * ( &
-                         - 3.0E0_dp * block(b) % schwerpunkt(i          ,j          ,k          ,d1) &
-                         + 4.0E0_dp * block(b) % schwerpunkt(i+ndir(1)  ,j+ndir(2)  ,k+ndir(3)  ,d1) &
-                         -            block(b) % schwerpunkt(i+ndir(1)*2,j+ndir(2)*2,k+ndir(3)*2,d1) )
-
-                     else if (nlv(d2) == block(b)%nCell(d2)+n_BC_Cells) then
-                        block(b) % metric1 (i,j,k,d1,d2) = 0.5E0_dp * ( &
-                         + 3.0E0_dp * block(b) % schwerpunkt(i          ,j          ,k          ,d1) &
-                         - 4.0E0_dp * block(b) % schwerpunkt(i-ndir(1)  ,j-ndir(2)  ,k-ndir(3)  ,d1) &
-                         +            block(b) % schwerpunkt(i-ndir(1)*2,j-ndir(2)*2,k-ndir(3)*2,d1) )
-                     else
-                        block(b) % metric1 (i,j,k,d1,d2) = 0.5E0_dp * ( &
-                           block(b) % schwerpunkt(i+ndir(1),j+ndir(2),k+ndir(3),d1) &
-                         - block(b) % schwerpunkt(i-ndir(1),j-ndir(2),k-ndir(3),d1) )
-                     end if
-                  end do !d2 = 1,Dimen
-               end do !d1 = 1, Dimen
-
-               block(b) % JacI(i,j,k) = block(b) % metric1(i,j,k,1,1) &
-                                      * block(b) % metric1(i,j,k,2,2) &
-                                      - block(b) % metric1(i,j,k,1,2) &
-                                      * block(b) % metric1(i,j,k,2,1)
-
-               block(b) % Jac(i,j,k) = 1.0E0_dp / block(b) % JacI(i,j,k)
-
-               do d1 = 1, Dimen
-                  do d2 = 1,Dimen
-                     block(b) % metric2(i,j,k,d1,d2) = block(b) % Jac(i,j,k) &
-                                 * block(b) % metric1(i,j,k,3-d1,3-d2)
-                     if (d2 /= d1) &
-                        block(b) % metric2(i,j,k,d1,d2) = - block(b) % metric2(i,j,k,d1,d2)
-                  end do
-               end do
-
-
-            end do !i = 1-n_BC_Cells, block(b)%nCell(1)+n_BC_Cells
-         end do !j = 1-n_BC_Cells, block(b)%nCell(2)+n_BC_Cells
-   !   end do !k = 1-n_BC_Cells, block(b)%nCell(3)+n_BC_Cells
+!      if (n_BC_Cells > 1) call error ("n_BC_CELLS >1 für ECKPUNKTE NICHT IMPLEMENTIERT",__FILE__,__LINE__)
+!
+!      k = 1
+!      do f = 1, nCorners
+!         if (f == 1 .or. f == 4 .or. f == 5 .or. f == 7) then
+!            i_start  = 0
+!            i_end    = -n_BC_Cells + 1
+!            idir = 1
+!         else
+!            i_start  = block(b)%nCell(1)+1 !n_BC_Cells
+!            i_end    = block(b)%nCell(1) + n_BC_Cells
+!            idir = -1
+!         end if
+!
+!         if (f == 1 .or. f == 2 .or. f == 5 .or. f == 6) then
+!            j_start  = 0
+!            j_end    =
+!         else
+!            j = block(b)%nCell(2)+1 !n_BC_Cells
+!         end if
+!
+!         block(b) % schwerpunkt(i,j,k,:) = 2.0D0 &
+!                                         * block(b) % schwerpunkt(i+idir  ,j,k,:) &
+!                                         - block(b) % schwerpunkt(i+idir*2,j,k,:)
+!
+!      end do !f = 1, nCorners
+!
+!
+!
+!
+!      !do k = 1-n_BC_Cells, block(b)%nCell(3)+n_BC_Cells
+!       k = 1
+!         nlv(3) = k
+!         do j = 1-n_BC_Cells, block(b)%nCell(2)+n_BC_Cells
+!            nlv(2) = j
+!            do i = 1-n_BC_Cells, block(b)%nCell(1)+n_BC_Cells
+!               nlv(1) = i
+!               do d1 = 1, Dimen ! physikalische Dimensionen x,y,z
+!                  do d2 = 1,Dimen  ! Gitter dimensionen i,j,k eta xi phi
+!                     ndir = 0
+!                     ndir(d2) = 1
+!                     if (nlv(d2) == 1-n_BC_Cells) then
+!
+!                        block(b) % metric1 (i,j,k,d1,d2) = 0.5E0_dp * ( &
+!                         - 3.0E0_dp * block(b) % schwerpunkt(i          ,j          ,k          ,d1) &
+!                         + 4.0E0_dp * block(b) % schwerpunkt(i+ndir(1)  ,j+ndir(2)  ,k+ndir(3)  ,d1) &
+!                         -            block(b) % schwerpunkt(i+ndir(1)*2,j+ndir(2)*2,k+ndir(3)*2,d1) )
+!
+!                     else if (nlv(d2) == block(b)%nCell(d2)+n_BC_Cells) then
+!                        block(b) % metric1 (i,j,k,d1,d2) = 0.5E0_dp * ( &
+!                         + 3.0E0_dp * block(b) % schwerpunkt(i          ,j          ,k          ,d1) &
+!                         - 4.0E0_dp * block(b) % schwerpunkt(i-ndir(1)  ,j-ndir(2)  ,k-ndir(3)  ,d1) &
+!                         +            block(b) % schwerpunkt(i-ndir(1)*2,j-ndir(2)*2,k-ndir(3)*2,d1) )
+!                     else
+!                        block(b) % metric1 (i,j,k,d1,d2) = 0.5E0_dp * ( &
+!                           block(b) % schwerpunkt(i+ndir(1),j+ndir(2),k+ndir(3),d1) &
+!                         - block(b) % schwerpunkt(i-ndir(1),j-ndir(2),k-ndir(3),d1) )
+!                     end if
+!                  end do !d2 = 1,Dimen
+!               end do !d1 = 1, Dimen
+!
+!               block(b) % JacI(i,j,k) = block(b) % metric1(i,j,k,1,1) &
+!                                      * block(b) % metric1(i,j,k,2,2) &
+!                                      - block(b) % metric1(i,j,k,1,2) &
+!                                      * block(b) % metric1(i,j,k,2,1)
+!
+!               block(b) % Jac(i,j,k) = 1.0E0_dp / block(b) % JacI(i,j,k)
+!
+!               do d1 = 1, Dimen
+!                  do d2 = 1,Dimen
+!                     block(b) % metric2(i,j,k,d1,d2) = block(b) % Jac(i,j,k) &
+!                                 * block(b) % metric1(i,j,k,3-d1,3-d2)
+!                     if (d2 /= d1) &
+!                        block(b) % metric2(i,j,k,d1,d2) = - block(b) % metric2(i,j,k,d1,d2)
+!                  end do
+!               end do
+!
+!
+!            end do !i = 1-n_BC_Cells, block(b)%nCell(1)+n_BC_Cells
+!         end do !j = 1-n_BC_Cells, block(b)%nCell(2)+n_BC_Cells
+!   !   end do !k = 1-n_BC_Cells, block(b)%nCell(3)+n_BC_Cells
    end do !b = 1,nBlock
 
 end subroutine calc_metrices

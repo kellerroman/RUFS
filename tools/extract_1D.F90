@@ -200,22 +200,26 @@ do
         write(arg,'("(I3,",I0,"("","",F20.12))")') nVar+1
         write(fo,*)
         if (var_dir == 1) then
-         j = block(b) %  nCell(2)/2
-         do i = 1,block(b) %  nCell(1)
-            write(fo,arg) i-nBCC_out(1,1),DBLE(i-nBCC_out(1,1)),(block(b) % Q(i,j,1,var),var=1,nVar)
-         end do
+            j = block(b) %  nCell(2)/2
+            do i = 1,block(b) %  nCell(1)
+               write(fo,arg) i-nBCC_out(1,1) &
+               ,DBLE((i-nBCC_out(1,1)))/DBLE(block(b) %  nCell(1)-nBCC_out(1,1))&
+               ,(block(b) % Q(i,j,1,var),var=1,nVar)
+            end do
          else if (var_dir == 2) then
-         i = block(b) %  nCell(1)/2
-         do j = 1,block(b) %  nCell(2)
-            write(fo,arg) j-nBCC_out(2,1),DBLE(j-nBCC_out(2,1)),(block(b) % Q(i,j,1,var),var=1,nVar)
-         end do
+            i = block(b) %  nCell(1)/2
+            do j = 1,block(b) %  nCell(2)
+               write(fo,arg) j-nBCC_out(2,1)&
+                ,DBLE((j-nBCC_out(2,1)))/DBLE(block(b) %  nCell(2)-nBCC_out(2,1))&
+                ,(block(b) % Q(i,j,1,var),var=1,nVar)
+            end do
          else if (var_dir == 3) then
-
-         do j = 1,min(block(b) %  nCell(1),block(b) %  nCell(2))
-            i = j
-            write(fo,arg) j-nBCC_out(2,1),DBLE(j-nBCC_out(2,1)),(block(b) % Q(i,j,1,var),var=1,nVar)
-         end do
-
+            do j = 1,min(block(b) %  nCell(1),block(b) %  nCell(2))
+               i = j
+               write(fo,arg) j-nBCC_out(2,1) &
+               ,DBLE(j-nBCC_out(2,1))/DBLE(block(b) %  nCell(2)-nBCC_out(2,1)) &
+               ,(block(b) % Q(i,j,1,var),var=1,nVar)
+            end do
          end if
          close (fo)
       end do !b = 1, nBlock

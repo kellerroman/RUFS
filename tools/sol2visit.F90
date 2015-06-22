@@ -27,27 +27,23 @@ include "silo_f9x.inc"
    !< Anzahl der Ausgabepunkt ider der Datei
    integer :: status
    integer :: nCell
-
+   integer :: num_Pkt(3)
    integer :: nBCC_out(3,2)
    !< Gibt die Ausgeschriebenen Randzellen an
    integer :: b,var,i,j,k,d
 
-
 !!!!! SILO
-
    integer :: dbfile, ierr, err, optlistid
 
    character(len = 8), allocatable ::  blocknames(:)
-   integer, allocatable ::             lblocknames(:)
-   integer, allocatable ::             meshtypes(:)
-
+!   integer, allocatable ::             lblocknames(:)
+!   integer, allocatable ::             meshtypes(:)
 
    sol_file = "sol.bin"
    git_file = "git.bin"
    out_file = "sol.silo"
 
    call wr("CONVERT SOLUTION 2 VisIt",1)
-
 
    open( unit = fg , file = trim(git_file)                             &
        , form = "unformatted", access = "stream", status = "old")
@@ -58,8 +54,6 @@ include "silo_f9x.inc"
       write(*,*) "ERROR: GIT Version wrong!",rg_Version,git_Version
       STOP 1
    end if
-
-
 
    arg_count=command_argument_count()
    open( unit = fu , file = trim(sol_file)                             &
@@ -131,13 +125,17 @@ include "silo_f9x.inc"
 
 
       nCell = nCell + product(block(b) % nCell)
-      allocate ( block(b) % Q(block(b) % nCell(1),block(b) % nCell(2),block(b) % nCell(3),nVar))
-      allocate ( block(b) % xyz(block(b) % nPkt(1),block(b) % nPkt(2),block(b) % nPkt(3),Dimen))
    end do
    write(*,'(10X,A,1X,I0)') "Total Number of Cells:" ,nCell
-
+   nBCC_out = 0
    do b = 1,nBlock
       read(fu) nBCC_out(1:Dimen,:)
+      allocate ( block(b) % Q(block(b) % nCell(1) &
+                                                  ,block(b) % nCell(2) &
+                                                  ,block(b) % nCell(3), nVar))
+      allocate ( block(b) % xyz( block(b) % nPkt(1) + nBCC_out(1,1) + nBCC_out(1,2) &
+                                                     , block(b) % nPkt(2) + nBCC_out(2,1) + nBCC_out(2,2) &
+                                                     , block(b) % nPkt(3) + nBCC_out(3,1) + nBCC_out(3,2), Dimen))
       do var = 1,Dimen
          if (block(b) % nCell(var)-sum(nBCC_out(var,:)) /= block(b) % nPkt(var)-1 ) then
             write(*,'(A,1X,I0,1X,A,I0,1X,I0)') "Dimensions of Block",b,"are different in Git and Sol:" &
@@ -147,9 +145,34 @@ include "silo_f9x.inc"
       end do
 
       read(fg) ((((block(b) % xyz(i,j,k,d),d=1,Dimen) &
-                                           ,i= 1,block(b) % nPkt(1)) &
-                                           ,j= 1,block(b) % nPkt(2)) &
-                                           ,k= 1,block(b) % nPkt(3))
+                                           ,i = 1+nBCC_out(1,1), block(b) % nPkt(1)+nBCC_out(1,1) ) &
+                                           ,j = 1+nBCC_out(2,1), block(b) % nPkt(2)+nBCC_out(2,1) ) &
+                                           ,k= 1+nBCC_out(3,1), block(b) % nPkt(3)+nBCC_out(3,1) )
+   end do
+   do b  = 1, nBlock
+      do i = 1+nBCC_out(1,1), block(b) % nPkt(1)+nBCC_out(1,1)
+         do j = nBCC_out(2,1),1,-1
+            block(b) % xyz(i,j,1,:) = 2.0D0 * block(b) % xyz(i,j+1,1,:) - block(b) % xyz(i,j+2,1,:)
+!            write(*,*) block(b) % xyz(i,j+2,1,:),block(b) % xyz(i,j+1,1,:)
+!            write(*,*) i,j,block(b) % xyz(i,j,1,:)
+         end do
+         do j = block(b) % nPkt(2)+nBCC_out(2,1)+1 , block(b) % nPkt(2)+nBCC_out(2,1)+nBCC_out(2,2)
+            block(b) % xyz(i,j,1,:) = 2.0D0 * block(b) % xyz(i,j -1,1,:) - block(b) % xyz(i,j-2,1,:)
+!            write(*,*) i,j,block(b) % xyz(i,j,1,:)
+         end do
+      end do
+      do i = nBCC_out(1,1), 1, -1
+         do j =  1, block(b) % nPkt(2)+ nBCC_out(2,1) + nBCC_out(2,2)
+            block(b) % xyz(i,j,1,:) = 2 * block(b) % xyz(i+1,j,1,:) - block(b) % xyz(i+2,j,1,:)
+!            write(*,*) i,j,block(b) % xyz(i,j,1,:)
+         end do
+      end do
+      do i = block(b) % nPkt(1)+1+nBCC_out(1,1) , block(b) % nPkt(1)+nBCC_out(1,1)+nBCC_out(1,2)
+         do j =  1, block(b) % nPkt(2)+ nBCC_out(2,1) + nBCC_out(2,2)
+            block(b) % xyz(i,j,1,:) = 2 * block(b) % xyz(i -1,j,1,:) - block(b) % xyz(i-2,j,1,:)
+!            write(*,*) i,j,block(b) % xyz(i,j,1,:)
+         end do
+      end do
    end do
 
    read(fu) VarName
@@ -194,7 +217,6 @@ do
       read(fu) iteration
 !      write(*,'(I0,1X)',advance = "no") iteration
 
-
       read(fu) marker
       if (marker /= io_marker_solution_header_end) then
          write(*,marker_error) __LINE__,"IO_MARKER_SOLUTION_HEADER_END",marker
@@ -209,19 +231,19 @@ do
          STOP 1
          endif
 
-
       err = dbmkoptlist(1, optlistid)
       err = dbaddiopt(optlistid, DBOPT_CYCLE, iteration)
       err = dbfreeoptlist(optlistid)
 
-
       do b = 1, nBlock
-
+         do i = 1, Dimen
+            num_pkt(i) = block(b) % nPkt(i) + nBCC_out(i,1) + nBCC_out(i,2)
+         end do
          err = dbputqm (dbfile, "quadmesh", 8 &
                        , "xc", 2,"yc", 2, "zc", 2 &
                        ,block(b) % xyz(:,:,:,1) &
                        ,block(b) % xyz(:,:,:,2) &
-                       ,DB_F77NULL, block(b) % nPKT(1:Dimen), Dimen&
+                       ,DB_F77NULL, num_pkt(1:Dimen), Dimen &
                        ,DB_DOUBLE, DB_NONCOLLINEAR, DB_F77NULL, ierr)
          read(fu) marker
          if (marker /= io_marker_solution_block_start) then
@@ -240,8 +262,11 @@ do
             !!!!! Zeichne SCHWERPUNKT GITTER
             if (var >= 2 ) then
                if (VarName(var-1) == VarName_SwpX .and. &
-                   VarName(var)   == VarName_SwpY .and. &
+                   VarName(var)       == VarName_SwpY .and. &
                    Dimen == 2) then
+!                   do i = 1,Dimen
+!                     cells(i) = block(b) % nCell(i) + nBCC_out(i,1) + nBCC_out(i,2)
+!                  end do
                   err = dbputqm (dbfile, "schwerpunkte", 12 &
                                 , "xc", 2,"yc", 2, "zc", 2  &
                                 ,block(b) % Q(:,:,:,var-1)    &
@@ -250,13 +275,12 @@ do
                                 ,DB_DOUBLE, DB_NONCOLLINEAR, DB_F77NULL, ierr)
                end if
             end if
+!            do i = 1,Dimen
+!               cells(i) = block(b) % nCell(i) + nBCC_out(i,1) + nBCC_out(i,2)
+!            end do
             err = dbputqv1(dbfile, trim(VarName(var)), len_trim(VarName(var)) &
                           ,"quadmesh", 8, block(b) % Q(:,:,:,var), block(b) % nCell(1:Dimen), Dimen &
                           , DB_F77NULL, 0, DB_DOUBLE, DB_ZONECENT, DB_F77NULL, ierr)
-
-
-
-
 
             read(fu) marker
             if (marker /= io_marker_solution_var_end) then
@@ -287,5 +311,3 @@ end do
    write(*,*)
    call wr("CONVERT SOLUTION done",1)
 end program sol2visit
-
-

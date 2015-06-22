@@ -27,7 +27,7 @@ run: git.bin str.dx
 	@echo 'Running Grid-Adaper on simple Chamber'
 	@$(PRE_CONFIG)
 	@$(PROGRAM) #-debug
-	@$(HOMEDIR)bin/extract_1D x
+	@$(HOMEDIR)bin/extract_1D y
 	@$(HOMEDIR)bin/sol2visit
 
 git.bin: gridgen

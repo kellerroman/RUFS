@@ -7,9 +7,9 @@ integer, intent(in) :: ExitCode
 
 
 if (ExitCode == EXIT_WITHOUT_ERROR) then
-   call wr("Program Ended Regularily",1)
+   call wr(achar(27)//"[31mProgram Ended Regularily"//achar(27)//"[0m",1)
 else if (ExitCode == EXIT_WITH_ERROR) then
-   call wr("ERROR",1)
+   call wr(achar(27)//"[31mERROR"//achar(27)//"[0m",1)
    stop 1
 end if
 

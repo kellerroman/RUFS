@@ -1,0 +1,14 @@
+navier-stokes equations
+multi block
+higher order
+timestep calc
+
+AUSM 
+AUSMPW+
+exact riemann
+
+
+
+testcases:
+helmholz wirbel
+NACA flügel

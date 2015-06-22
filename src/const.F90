@@ -82,6 +82,10 @@ character ( len = io_len_Varname ), parameter :: VarName_Rho        = "Dichte"
 character ( len = io_len_Varname ), parameter :: VarName_SpU        = "Geschw_U"
 character ( len = io_len_Varname ), parameter :: VarName_SpV        = "Geschw_V"
 character ( len = io_len_Varname ), parameter :: VarName_Ene        = "Energie"
+character ( len = io_len_Varname ), parameter :: VarName_Pre        = "Druck"
+
+!!!! DEGUB Ausgaben
+
 character ( len = io_len_Varname ), parameter :: VarName_SwpX       = "Schwerpunkt_X"
 character ( len = io_len_Varname ), parameter :: VarName_SwpY       = "Schwerpunkt_Y"
 character ( len = io_len_Varname ), parameter :: VarName_SwpZ       = "Schwerpunkt_Z"
@@ -94,8 +98,6 @@ character ( len = io_len_Varname ), parameter :: VarName_EdAnN      = "Edge_Angl
 character ( len = io_len_Varname ), parameter :: VarName_EdAnE      = "Edge_Angle_East"
 character ( len = io_len_Varname ), parameter :: VarName_EdAnS      = "Edge_Angle_South"
 character ( len = io_len_Varname ), parameter :: VarName_EdAnW      = "Edge_Angle_West"
-
-
 character ( len = io_len_Varname ), parameter :: VarName_Jac        = "Jacobi"
 character ( len = io_len_Varname ), parameter :: VarName_JacI       = "JacobiInv"
 character ( len = io_len_Varname ), parameter :: VarName_M1XI       = "M1_x_i"

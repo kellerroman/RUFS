@@ -31,7 +31,7 @@ end if
 read(fu)   control_num_iteration,control_sol_out,control_res_out &
           ,control_equation,control_dimension, space_disc, space_order &
           ,control_dt_method, control_riemann_solver,control_CFL &
-          ,control_timestep
+          ,control_timestep,control_bc_cells_out
 
 call wr("CONFIG INFORMATION",2)
 write(*,'(A40," = ",I0)') "Number of Iterations", control_num_iteration
@@ -40,16 +40,17 @@ write(*,'(A40," = ",I0)') "Output Residual", control_res_out
 write(*,'(A40," = ",A)') "Riemann Solver", string_Riemann_Solver(control_riemann_solver)
 write(*,'(A40," = ",A)') "Time Integration Theme",string_dt_solver(control_dt_method)
 write(*,'(A40," = ",ES10.4)') "Timestep",control_timestep
+write(*,'(A40," = ",I0)') "Output BC Out", control_bc_cells_out
 
 if ( control_equation == 1 .and. control_dimension <= 2 ) then
    nVar = 4
-   sol_out_nVar = sol_out_nVar + 4
+   sol_out_nVar = sol_out_nVar + 5
 end if
 
 if (space_order < 3) then
-   n_BC_Cells = 1
-else
    n_BC_Cells = 2
+else
+   n_BC_Cells = 3
 end if
 
 t = 1
@@ -59,6 +60,7 @@ if ( control_equation == 1 .and. control_dimension <= 2 ) then
    VarName(t) = VarName_SpU; t = t + 1
    VarName(t) = VarName_SpV; t = t + 1
    VarName(t) = VarName_Ene; t = t + 1
+   VarName(t) = VarName_Pre; t = t + 1
 end if
 !VarName(t) = VarName_EdLeW; t = t + 1
 !VarName(t) = VarName_EdLeE; t = t + 1

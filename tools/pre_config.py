@@ -19,6 +19,7 @@ dt_method    = 2
 riemann_solver = 2
 CFL         = 0.1
 timestep    = 1E-4
+boundary_cell_output = 0
 
 for section_name in parser.sections():
     #print ('Section:', section_name)
@@ -34,6 +35,8 @@ for section_name in parser.sections():
             solution = int(value)
         elif (section_name == "output" and name == "residual"):
             residual = int(value)
+        elif (section_name == "output" and name == "boundary cell"):
+            boundary_cell_output = int(value)
         elif (section_name == "disc" and name == "timestep"):
             timestep = float(value)
         elif (section_name == "disc" and name == "cfl"):
@@ -83,3 +86,4 @@ with open('config.bin', 'wb') as f:
     f.write(riemann_solver       .to_bytes(4, byteorder='little', signed=True))
     f.write(struct.pack('d',CFL))
     f.write(struct.pack('d',timestep))
+    f.write(boundary_cell_output       .to_bytes(4, byteorder='little', signed=True))

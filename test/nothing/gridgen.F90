@@ -1,8 +1,8 @@
 program gridgen
 implicit none
 
-integer, parameter :: imax = 101
-integer, parameter :: jmax = 4 
+integer, parameter :: imax = 21
+integer, parameter :: jmax = 21
 integer, parameter :: fu_git = 99
 integer, parameter :: Version = 1000
 INTEGER, PARAMETER :: ioout = 10
@@ -10,7 +10,7 @@ INTEGER, PARAMETER :: ioout = 10
 integer, parameter :: Dimen = 2
 integer, parameter :: nBlock = 1
 
-integer, parameter :: bc(4) = (/-2,-2,-4,-4/)
+integer, parameter :: bc(4) = (/-2,-3,-1,-4/)
 
 real(kind=8) :: xyz (imax,jmax,Dimen)
 
@@ -22,7 +22,7 @@ do i = 1,imax
    do j = 1,jmax
       xyz(i,j,1) = 1.0D0/dble(imax-1) * dble(i-1)
 
-      xyz(i,j,2) = 1.0D-1/dble(jmax-1) * dble(j-1)!+5.0D-1/dble(imax-1) * dble(i-1)
+      xyz(i,j,2) = 1.0D0/dble(jmax-1) * dble(j-1)!+5.0D-1/dble(imax-1) * dble(i-1)
 !      write(*,*) i,j,xyz(i,j,1),xyz(i,j,2)
    end do
 end do

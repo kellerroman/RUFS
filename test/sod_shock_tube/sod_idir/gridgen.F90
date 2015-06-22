@@ -10,10 +10,10 @@ INTEGER, PARAMETER :: ioout = 10
 integer, parameter :: Dimen = 2
 integer, parameter :: nBlock = 1
 
-integer, parameter :: bc(4) = (/-2,-3,-4,-4/)
+integer, parameter :: bc(4) = (/-2,-2,-4,-4/)
 
 real(kind=8), parameter :: a2d = 180.0D0 / 3.1415927D0
-real(kind=8),parameter :: winkel = 90.0D0 / a2d
+real(kind=8),parameter :: winkel = 0.0D0 / a2d
 
 real(kind=8) :: xyz (imax,jmax,Dimen)
 real(kind=8) :: mat(2,2)

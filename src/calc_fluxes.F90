@@ -3,63 +3,57 @@ subroutine calc_fluxes()
    use const
    use control
    implicit none
-
    real(kind = dp) :: met(2,2)
    real(kind = dp) :: Jac
    real(kind = dp) :: sp(2,2)
    real(kind = dp) :: UL(nVar),UR(nVar)
-   real(kind = dp) :: rho, u , v , gam1, p, velsq
    real(kind = dp) :: flux(nVar)
-
    integer :: b,i,j,k,d1,d2
 
-   gam1 = 1.4E0_dp-1.0E0_dp
-!     gamma = 1.4
-!   density = u(1)
-!  velocity = u(2)/u(1)
-!  pressure = (gamma-1.0)*( u(3) - 0.5*density*velocity*velocity )
-!  enthalpy = u(3) + pressure
-!
-!!Evaluate the physical flux (mass, momentum, and energy fluxes).
-!  physical_flux(1) =           density * velocity
-!  physical_flux(2) = (density*velocity)* velocity + pressure
-!  physical_flux(3) =          enthalpy * velocity
+
 
    do b = 1,nBlock
+
       do k = 1, block(b) % nCell(3)
          do j = 1, block(b) % nCell(2)
             do i = 1, block(b) % nPkt(1)
                UR = block(b) % Q(i,j,k,:)
                UL = block(b) % Q(i-1,j,k,:)
-
                if ( control_riemann_solver == 1) then
-                  block(b) % Flux(i,j,k,:,1) = - Rotated_RHLL(UL, UR, block(b) % Edge_Vec(:,i,j,k,1))
+                  block(b) % Flux(i,j,k,:,1) = Rotated_RHLL &
+                                                                  (UL, UR, block(b) % Edge_Vec(:,i,j,k,1) )
                else if ( control_riemann_solver == 2) then
-                  block(b) % Flux(i,j,k,:,1) = - Roe(UL, UR, block(b) % Edge_Vec(:,i,j,k,1))
+                  block(b) % Flux(i,j,k,:,1) = Roe &
+                                                                  (UL, UR, block(b) % Edge_Vec(:,i,j,k,1) )
                end if
-
                block(b) % Flux(i,j,k,:,1) = block(b) % Flux(i,j,k,:,1) * block(b) % Edge_Len(i,j,k,1)
-
+!               if (i == 24) then
+!                  write(*,*) j,block(b) % Edge_Vec(:,i,j,k,1),block(b) % Edge_Vec(:,i,j,k,2)
+!                  end if
             end do
          end do
       end do
+
       do k = 1, block(b) % nCell(3)
          do j = 1, block(b) % nPkt(2)
             do i = 1, block(b) % nCell(1)
                UR = block(b) % Q(i,j,k,:)
                UL = block(b) % Q(i,j-1,k,:)
-
                if ( control_riemann_solver == 1) then
-                  block(b) % Flux(i,j,k,:,2) = - Rotated_RHLL(UL, UR, block(b) % Edge_Vec(:,i,j,k,2))
+                  block(b) % Flux(i,j,k,:,2) = Rotated_RHLL &
+                                                                  (UL, UR, block(b) % Edge_Vec(:,i,j,k,2) )
                else if ( control_riemann_solver == 2) then
-                  block(b) % Flux(i,j,k,:,2) = - Roe(UL, UR, block(b) % Edge_Vec(:,i,j,k,2))
+                  block(b) % Flux(i,j,k,:,2) = Roe &
+                                                                  (UL, UR, block(b) % Edge_Vec(:,i,j,k,2) )
                end if
-
                block(b) % Flux(i,j,k,:,2) =block(b) % Flux(i,j,k,:,2) * block(b) % Edge_Len(i,j,k,2)
-
+!               if (j == 24) then
+!                  write(*,*) i,block(b) % Edge_Vec(:,i,j,k,1),block(b) % Edge_Vec(:,i,j,k,2)
+!               end if
             end do
          end do
       end do
+
    end do
 
 contains

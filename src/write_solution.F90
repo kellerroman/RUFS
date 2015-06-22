@@ -53,7 +53,6 @@ if (sol_out) then
       open( unit = fu , file = trim(file_sol_out)                             &
           , form = "unformatted", access = "stream", status = "old"           &
           , position = "append"                                               )
-
    end if
    write(fu) io_marker_solution_start
    write(fu) io_marker_solution_header_start
@@ -78,6 +77,14 @@ if (sol_out) then
                                                             ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
             case(VarName_Ene)
                write(fu) (((block(b) % Q(i,j,k,4)           ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
+                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
+                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
+            case(VarName_Pre)
+               write(fu) ((((0.4E0_dp*(block(b) % Q(i,j,k,4) -0.5E0_dp &
+                                                            * (block(b) % Q(i,j,k,2)*block(b) % Q(i,j,k,2)&
+                                                            + block(b) % Q(i,j,k,3)*block(b) % Q(i,j,k,3))&
+                                                            / block(b) % Q(i,j,k,1) ) )&
+                                                             ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
                                                             ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
                                                             ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
             case(VarName_SwpX)

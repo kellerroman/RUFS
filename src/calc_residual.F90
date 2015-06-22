@@ -13,8 +13,8 @@ subroutine calc_residual
       do k = 1, block(b) % nCell(3)
          do j = 1, block(b) % nCell(2)
             do i = 1, block(b) % nCell(1)
-               block(b) % Res(i,j,k,:) = block(b) % Flux(i+1,j,k,:,1) - block(b) % Flux(i,j,k,:,1) &
-                                                       + block(b) % Flux(i,j+1,k,:,2) - block(b) % Flux(i,j,k,:,2)
+               block(b) % Res(i,j,k,:) = + block(b) % Flux(i+1,j,k,:,1) - block(b) % Flux(i,j,k,:,1) &
+                                                           + block(b) % Flux(i,j+1,k,:,2) - block(b) % Flux(i,j,k,:,2)
 !               if (j == 1) then
 !                  write(*,*) i,block(b) % Res(i,j,k,:)
 !               end if

@@ -75,7 +75,11 @@ type :: tblock
    !< Richtung ist für Ost&Süd Vektoren richtig, West&Nord muss mit -1 multipliziert werden.
    !< EDGE_DIR: 1 ist in i-Richtung (West&Ost), 2 ist in j-Richtung (Süd&Nord),...
    !< COORD gibt X,y,z wert an
+   !< Vectoren zeigen Nach hinten(i) & oben(j)
+
+
    real(kind=dp),allocatable :: Area (:,:,:)
+
 
    type(tbc), allocatable    :: face(:)
    !< GIBT BLOCKVERBDINUNG DES BLOCKES AN: (FACE)

@@ -1,6 +1,5 @@
 program git2visit
 
-
    use const
    use types
    implicit none
@@ -24,9 +23,7 @@ include "silo_f9x.inc"
    !< Gibt die Ausgeschriebenen Randzellen an
    integer :: b,var,i,j,k,d
 
-
 !!!!! SILO
-
    integer :: dbfile, ierr, err, optlistid
 
    character(len = 8), allocatable ::  blocknames(:)
@@ -38,7 +35,6 @@ include "silo_f9x.inc"
 
    call wr("CONVERT GIT 2 VisIt",1)
 
-
    open( unit = fg , file = trim(git_file)                             &
        , form = "unformatted", access = "stream", status = "old")
 
@@ -48,8 +44,6 @@ include "silo_f9x.inc"
       write(*,*) "ERROR: GIT Version wrong!",rg_Version,git_Version
       STOP 1
    end if
-
-
 
    if (Dimen == 1) then
       write(*,'(10X,A)') "1D Calculation"
@@ -63,7 +57,6 @@ include "silo_f9x.inc"
    end if
 
    allocate(block(nBlock))
-
    allocate (blocknames  (nBlock))
    allocate (lblocknames (nBlock))
    allocate (meshtypes   (nBlock))
