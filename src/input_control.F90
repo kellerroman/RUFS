@@ -41,13 +41,14 @@ write(*,'(A40," = ",A)') "Riemann Solver", string_Riemann_Solver(control_riemann
 write(*,'(A40," = ",A)') "Time Integration Theme",string_dt_solver(control_dt_method)
 write(*,'(A40," = ",ES10.4)') "Timestep",control_timestep
 write(*,'(A40," = ",I0)') "Output BC Out", control_bc_cells_out
-
+write(*,'(A40," = ",I0)') "Spatial Order", space_order
+write(*,'(A40," = ",I0)') "Spatial Disc", space_disc
 if ( control_equation == 1 .and. control_dimension <= 2 ) then
    nVar = 4
    sol_out_nVar = sol_out_nVar + 5
 end if
 
-if (space_order < 3) then
+if (space_order < 2) then
    n_BC_Cells = 2
 else
    n_BC_Cells = 3

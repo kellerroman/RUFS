@@ -62,6 +62,10 @@ do b = 1,nBlock
                                     ,1            : block(b)%nCell(2)             &
                                     ,1            : block(b)%nCell(3)             ))
 
+   allocate ( block(b) % Q_rec (1 : block(b)%nPkt(1) &
+                                                   ,1 : block(b)%nPkt(2) &
+                                                   ,1 : block(b)%nPkt(3) &
+                                                   ,nVar,Dimen,2))
 
 
    block(b) % Q(:,:,:,1) = 1.0E0_dp
@@ -83,6 +87,7 @@ else
        block(b) % Q(block(b)%nPkt(1) - j : block(b)%nPkt(1),j,:,4) = 0.1E0_dp / 0.4E0_dp
    end do
 end if
+
    Gamma  = 1.4E0_dp
    gm1 = gamma - 1.0E0_dp
    rho = 4.0E0_dp

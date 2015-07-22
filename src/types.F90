@@ -50,7 +50,6 @@ type :: tblock
    real(kind=dp),allocatable :: dt(:,:,:)
    !< Cell-Timestep (I,J,K)
 
-
    real(kind=dp),allocatable :: schwerpunkt(:,:,:,:)
    
    real(kind=dp),allocatable :: metric1(:,:,:,:,:)
@@ -84,6 +83,10 @@ type :: tblock
    type(tbc), allocatable    :: face(:)
    !< GIBT BLOCKVERBDINUNG DES BLOCKES AN: (FACE)
    !< FACE: 1 = W, 2 = E, 3 = S, 4 = N, 5 = B, 6 = F
+
+   real(kind=dp), allocatable :: Q_rec(:,:,:,:,:,:)
+   !< Rekonstriuerter  Zellkanten Wert
+   !< (I,J,K,VAR_INDEX,Dimension,Links/Rechts)
 
 end type tblock
 end module types

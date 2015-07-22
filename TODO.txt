@@ -1,14 +1,31 @@
+DONE:
+basic structured solver
+euler equations
+2nd order spatial disc
+1st order temporal disc
+
+TODO:
+before moving to unstr:
 navier-stokes equations
-multi block
 higher order
 timestep calc
+inplicit ??
+after moving to unstr: 
+parallelization MPI / OpenMP
+multi block
+turbulence modeling 1 / 2 equation model
+combustion
 
-AUSM 
+todo riemann solvers:
+AUSM
 AUSMPW+
+AUSM+UP
 exact riemann
 
 
 
 testcases:
+instat:
 helmholz wirbel
+stat:
 NACA flügel

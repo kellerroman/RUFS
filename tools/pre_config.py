@@ -67,6 +67,15 @@ for section_name in parser.sections():
             else:
                 print ("Riemann Solver nicht erkannt:",value)
                 stop 
+        elif (section_name == "disc" and name == "space disc"):
+            if (value == "notvd"):
+                space_disc = 0
+            elif (value == "muscl"):
+                space_disc = 1
+            else:
+                print ("Spatial Discretization mechanism nicht erkannt:",value)
+                stop 
+        
         elif (section_name == "disc" and name == "space order"):
             space_order = int(value)  
         else:

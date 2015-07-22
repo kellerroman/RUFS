@@ -3,12 +3,96 @@ subroutine calc_fluxes()
    use const
    use control
    implicit none
+   real(kind = dp),parameter :: dh = 1.5E0_dp
+   real(kind = dp),parameter :: eh = 0.5E0_dp
+   real(kind = dp),parameter :: epsi = 1.0E-10_dp
    real(kind = dp) :: met(2,2)
    real(kind = dp) :: Jac
    real(kind = dp) :: sp(2,2)
    real(kind = dp) :: UL(nVar),UR(nVar)
    real(kind = dp) :: flux(nVar)
+   real(kind = dp) :: R(nVar)
    integer :: b,i,j,k,d1,d2
+
+   if (space_order == 2 .and. space_disc == 0) then
+      do b = 1,nBlock
+         do k = 1, block(b) % nCell(3)
+            do j = 1, block(b) % nCell(2)
+               do i = 1, block(b) % nPkt(1)
+                  block(b) % Q_rec(i,j,k,:,1,1) = dh * block(b) % Q(i-1,j,k,:) -eh *  block(b) % Q(i-2,j,k,:)
+                  block(b) % Q_rec(i,j,k,:,1,2) = dh * block(b) % Q(i     ,j,k,:) -eh *  block(b) % Q(i+1,j,k,:)
+                  end do
+            end do
+         end do
+         do k = 1, block(b) % nCell(3)
+            do j = 1, block(b) % nPkt(2)
+               do i = 1, block(b) % nCell(1)
+                  block(b) % Q_rec(i,j,k,:,2,1) = dh * block(b) % Q(i,j-1,k,:) -eh *  block(b) % Q(i,j-2,k,:)
+                  block(b) % Q_rec(i,j,k,:,2,2) = dh * block(b) % Q(i,j     ,k,:) -eh *  block(b) % Q(i,j+1,k,:)
+               end do
+            end do
+         end do
+      end do
+   else if (space_order == 2 .and. space_disc == 1) then ! MUSCL 2nd ORDER
+      do b = 1,nBlock
+         do k = 1, block(b) % nCell(3)
+            do j = 1, block(b) % nCell(2)
+               do i = 1, block(b) % nPkt(1)
+                  R = (block(b) % Q(i+1,j,k,:) - block(b) % Q(i,j,k,:))  &
+                      / (block(b) % Q(i,j,k,:) - block(b) % Q(i-1,j,k,:)+epsi)
+                  call minmod(R)
+                  block(b) % Q_rec(i,j,k,:,1,1) = block(b) % Q(i-1,j,k,:) + eh * R &
+                                                                      * (block(b) % Q(i-1,j,k,:) - block(b) % Q(i-2,j,k,:))
+                  R = ( block(b) % Q(i+1,j,k,:) - block(b) % Q(i,j,k,:) )  &
+                      / ( block(b) % Q(i+2,j,k,:) - block(b) % Q(i+1,j,k,:) + epsi )
+                  call minmod(R)
+                  block(b) % Q_rec(i,j,k,:,1,2) = block(b) % Q(i,j,k,:) - eh * R &
+                                                                      * (block(b) % Q(i+1,j,k,:) - block(b) % Q(i,j,k,:))
+                  end do
+            end do
+         end do
+         do k = 1, block(b) % nCell(3)
+            do j = 1, block(b) % nPkt(2)
+               do i = 1, block(b) % nCell(1)
+
+                  R = (block(b) % Q(i,j+1,k,:) - block(b) % Q(i,j,k,:))  &
+                      / (block(b) % Q(i,j,k,:) - block(b) % Q(i,j-1,k,:)+epsi)
+                  call minmod(R)
+                  block(b) % Q_rec(i,j,k,:,2,1) = block(b) % Q(i,j-1,k,:) + eh * R &
+                                                                      * (block(b) % Q(i,j-1,k,:) - block(b) % Q(i,j-2,k,:))
+
+                  R = ( block(b) % Q(i,j+1,k,:) - block(b) % Q(i,j,k,:) )  &
+                      / ( block(b) % Q(i,j+2,k,:) - block(b) % Q(i,j+1,k,:) + epsi )
+                  call minmod(R)
+                  block(b) % Q_rec(i,j,k,:,2,2) = block(b) % Q(i,j,k,:) - eh * R &
+                                                                      * (block(b) % Q(i,j+1,k,:) - block(b) % Q(i,j,k,:))
+!                  block(b) % Q_rec(i,j,k,:,2,1) = dh * block(b) % Q(i,j-1,k,:) -eh *  block(b) % Q(i,j-2,k,:)
+!                  block(b) % Q_rec(i,j,k,:,2,2) = dh * block(b) % Q(i,j     ,k,:) -eh *  block(b) % Q(i,j+1,k,:)
+               end do
+            end do
+         end do
+      end do
+   else ! 1st order
+      do b = 1,nBlock
+         do k = 1, block(b) % nCell(3)
+            do j = 1, block(b) % nCell(2)
+               do i = 1, block(b) % nPkt(1)
+                  block(b) % Q_rec(i,j,k,:,1,1) = block(b) % Q(i-1,j,k,:)
+                  block(b) % Q_rec(i,j,k,:,1,2) = block(b) % Q(i,j,k,:)
+               end do
+            end do
+         end do
+         do k = 1, block(b) % nCell(3)
+            do j = 1, block(b) % nPkt(2)
+               do i = 1, block(b) % nCell(1)
+                  block(b) % Q_rec(i,j,k,:,2,1) = block(b) % Q(i,j-1,k,:)
+                  block(b) % Q_rec(i,j,k,:,2,2) = block(b) % Q(i,j,k,:)
+               end do
+            end do
+         end do
+      end do
+   end if
+
 
 
 
@@ -17,8 +101,8 @@ subroutine calc_fluxes()
       do k = 1, block(b) % nCell(3)
          do j = 1, block(b) % nCell(2)
             do i = 1, block(b) % nPkt(1)
-               UR = block(b) % Q(i,j,k,:)
-               UL = block(b) % Q(i-1,j,k,:)
+               UL = block(b) % Q_rec(i,j,k,:,1,1)
+               UR = block(b) % Q_rec(i,j,k,:,1,2)
                if ( control_riemann_solver == 1) then
                   block(b) % Flux(i,j,k,:,1) = Rotated_RHLL &
                                                                   (UL, UR, block(b) % Edge_Vec(:,i,j,k,1) )
@@ -37,15 +121,19 @@ subroutine calc_fluxes()
       do k = 1, block(b) % nCell(3)
          do j = 1, block(b) % nPkt(2)
             do i = 1, block(b) % nCell(1)
-               UR = block(b) % Q(i,j,k,:)
-               UL = block(b) % Q(i,j-1,k,:)
+               UL = block(b) % Q_rec(i,j,k,:,2,1)
+               UR = block(b) % Q_rec(i,j,k,:,2,2)
+
                if ( control_riemann_solver == 1) then
                   block(b) % Flux(i,j,k,:,2) = Rotated_RHLL &
                                                                   (UL, UR, block(b) % Edge_Vec(:,i,j,k,2) )
+
                else if ( control_riemann_solver == 2) then
                   block(b) % Flux(i,j,k,:,2) = Roe &
                                                                   (UL, UR, block(b) % Edge_Vec(:,i,j,k,2) )
+
                end if
+
                block(b) % Flux(i,j,k,:,2) =block(b) % Flux(i,j,k,:,2) * block(b) % Edge_Len(i,j,k,2)
 !               if (j == 24) then
 !                  write(*,*) i,block(b) % Edge_Vec(:,i,j,k,1),block(b) % Edge_Vec(:,i,j,k,2)
@@ -100,7 +188,7 @@ implicit none
      ny = vec(2)
 !Constants.
      gamma = 1.4
-      zero = 0.0
+     zero = 0.0
      fifth = 0.2
       half = 0.5
        one = 1.0
@@ -112,6 +200,11 @@ implicit none
   ty = nx
 !Primitive and other variables.
 !  Left state
+
+If ( ul(1) == 0.0E0_dp .or. ur(1) == 0.0E0_dp) then
+   write(*,*) "Roe",ul,ur
+end if
+
     rhoL = uL(1)
      vxL = uL(2)/uL(1)
      vyL = uL(3)/uL(1)
@@ -428,3 +521,14 @@ implicit none
 
 
 end subroutine calc_fluxes
+
+subroutine minmod ( a )
+   use const, only: dp
+   use control, only : nVar
+   implicit none
+   real(kind = dp), intent(inout) ::a(nVar)
+   integer :: n
+   do n = 1, nVar
+         a(n) = max(0.0E0_dp,min(1.0E0_dp,a(n)))
+   end do
+end subroutine minmod
