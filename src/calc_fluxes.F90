@@ -34,17 +34,18 @@ subroutine calc_fluxes()
          end do
       end do
    else if (space_order == 2 .and. space_disc == 1) then ! MUSCL 2nd ORDER
-      do b = 1,nBlock
+       do b = 1,nBlock
          do k = 1, block(b) % nCell(3)
             do j = 1, block(b) % nCell(2)
                do i = 1, block(b) % nPkt(1)
-                  R = (block(b) % Q(i+1,j,k,:) - block(b) % Q(i,j,k,:))  &
-                      / (block(b) % Q(i,j,k,:) - block(b) % Q(i-1,j,k,:)+epsi)
+                  R = (block(b) % Q(i,j,k,:) - block(b) % Q(i-1,j,k,:))  &
+                      / (block(b) % Q(i-1,j,k,:) - block(b) % Q(i-2,j,k,:)+epsi)
                   call minmod(R)
+                  !uL = u
                   block(b) % Q_rec(i,j,k,:,1,1) = block(b) % Q(i-1,j,k,:) + eh * R &
                                                                       * (block(b) % Q(i-1,j,k,:) - block(b) % Q(i-2,j,k,:))
-                  R = ( block(b) % Q(i+1,j,k,:) - block(b) % Q(i,j,k,:) )  &
-                      / ( block(b) % Q(i+2,j,k,:) - block(b) % Q(i+1,j,k,:) + epsi )
+                  R = ( block(b) % Q(i,j,k,:) - block(b) % Q(i-1,j,k,:) )  &
+                      / ( block(b) % Q(i+1,j,k,:) - block(b) % Q(i,j,k,:) + epsi )
                   call minmod(R)
                   block(b) % Q_rec(i,j,k,:,1,2) = block(b) % Q(i,j,k,:) - eh * R &
                                                                       * (block(b) % Q(i+1,j,k,:) - block(b) % Q(i,j,k,:))
@@ -55,19 +56,17 @@ subroutine calc_fluxes()
             do j = 1, block(b) % nPkt(2)
                do i = 1, block(b) % nCell(1)
 
-                  R = (block(b) % Q(i,j+1,k,:) - block(b) % Q(i,j,k,:))  &
-                      / (block(b) % Q(i,j,k,:) - block(b) % Q(i,j-1,k,:)+epsi)
+                  R = (block(b) % Q(i,j,k,:) - block(b) % Q(i,j-1,k,:))  &
+                      / (block(b) % Q(i,j-1,k,:) - block(b) % Q(i,j-2,k,:)+epsi)
                   call minmod(R)
                   block(b) % Q_rec(i,j,k,:,2,1) = block(b) % Q(i,j-1,k,:) + eh * R &
                                                                       * (block(b) % Q(i,j-1,k,:) - block(b) % Q(i,j-2,k,:))
 
-                  R = ( block(b) % Q(i,j+1,k,:) - block(b) % Q(i,j,k,:) )  &
-                      / ( block(b) % Q(i,j+2,k,:) - block(b) % Q(i,j+1,k,:) + epsi )
+                  R = ( block(b) % Q(i,j,k,:) - block(b) % Q(i,j-1,k,:) )  &
+                      / ( block(b) % Q(i,j+1,k,:) - block(b) % Q(i,j,k,:) + epsi )
                   call minmod(R)
                   block(b) % Q_rec(i,j,k,:,2,2) = block(b) % Q(i,j,k,:) - eh * R &
                                                                       * (block(b) % Q(i,j+1,k,:) - block(b) % Q(i,j,k,:))
-!                  block(b) % Q_rec(i,j,k,:,2,1) = dh * block(b) % Q(i,j-1,k,:) -eh *  block(b) % Q(i,j-2,k,:)
-!                  block(b) % Q_rec(i,j,k,:,2,2) = dh * block(b) % Q(i,j     ,k,:) -eh *  block(b) % Q(i,j+1,k,:)
                end do
             end do
          end do
@@ -93,11 +92,7 @@ subroutine calc_fluxes()
       end do
    end if
 
-
-
-
    do b = 1,nBlock
-
       do k = 1, block(b) % nCell(3)
          do j = 1, block(b) % nCell(2)
             do i = 1, block(b) % nPkt(1)

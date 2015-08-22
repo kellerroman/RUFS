@@ -5,7 +5,7 @@ CFLAGS = -std=f2003
 CFLAGS += -Wconversion -Wall -Wextra -Warray-temporaries
 #CFLAGS += -DDEBUG #Unnecessary comments are oppressed
 CFLAGS += -O3
-CFLAGS += -g -fbacktrace -ffpe-trap=invalid,zero,overflow -fcheck=all -fbounds-check
+#CFLAGS += -g -fbacktrace -ffpe-trap=invalid,zero,overflow -fcheck=all -fbounds-check
 EXECUTABLE = ../bin/solver
 SOURCE_DIR = ../src
 

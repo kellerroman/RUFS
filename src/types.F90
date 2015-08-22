@@ -76,6 +76,9 @@ type :: tblock
    !< COORD gibt X,y,z wert an
    !< Vectoren zeigen Nach hinten(i) & oben(j)
 
+   real(kind=dp),allocatable :: Len_dt (:,:,:,:)
+   !< Zellenlänge für die Zeitschrittberechnenung ( COORD,I,J,K)
+
 
    real(kind=dp),allocatable :: Area (:,:,:)
 

@@ -14,7 +14,7 @@ stop_iter = .false.
 
 main_loop: do while (.not. stop_iter)
    call iter_control !! SETTING VARIABLES FOR EACH ITERATION
-
+   6
    call set_boundary()
    call calc_fluxes()
    call calc_residual()
