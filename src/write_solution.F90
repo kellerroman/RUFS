@@ -140,48 +140,6 @@ if (sol_out) then
                                                             ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
                                                             ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
                                                             ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-
-            case(VarName_Jac)
-               write(fu) (((block(b) % Jac(i,j,k)           ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-            case(VarName_JacI)
-               write(fu) (((block(b) % JacI(i,j,k)          ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-            case(VarName_M1XI)
-               write(fu) (((block(b) % metric1(i,j,k,1,1)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-            case(VarName_M1XJ)
-               write(fu) (((block(b) % metric1(i,j,k,1,2)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-            case(VarName_M1YI)
-               write(fu) (((block(b) % metric1(i,j,k,2,1)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-            case(VarName_M1YJ)
-               write(fu) (((block(b) % metric1(i,j,k,2,2)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-            case(VarName_M2XI)
-               write(fu) (((block(b) % metric2(i,j,k,1,1)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-            case(VarName_M2XJ)
-               write(fu) (((block(b) % metric2(i,j,k,1,2)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-            case(VarName_M2YI)
-               write(fu) (((block(b) % metric2(i,j,k,2,1)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-            case(VarName_M2YJ)
-               write(fu) (((block(b) % metric2(i,j,k,2,2)   ,i = 1-nBCC_out(1,1),block(b) % nCell(1)+nBCC_out(1,2) ) &
-                                                            ,j = 1-nBCC_out(2,1),block(b) % nCell(2)+nBCC_out(2,2) ) &
-                                                            ,k = 1-nBCC_out(3,1),block(b) % nCell(3)+nBCC_out(3,2) )
-
             case default
                call error("VAR TO WRITE UNKNOWN: "//trim(varname(var)),__FILE__,__LINE__)
          end select

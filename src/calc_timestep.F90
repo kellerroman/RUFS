@@ -9,7 +9,7 @@ subroutine calc_timestep
 
    real(kind=dp) :: dt_min
 
-   real(kind=dp) :: us, vs, ce, sq, p, rho, dt
+   real(kind=dp) :: u, v,rho,x,y,dt
 
    do b = 1, nBlock
       if (control_dt_method == 1) then
@@ -19,29 +19,13 @@ subroutine calc_timestep
          do k= 1, block(b) % nCell(3)
             do j= 1, block(b) % nCell(2)
                do i= 1, block(b) % nCell(1)
-                  rho = block(b)%Q(i,j,k,1)
-                  us = abs(block(b)%metric2(i,j,k,1,1) * block(b)%Q(i,j,k,2)           &
-                     +     block(b)%metric2(i,j,k,1,2) * block(b)%Q(i,j,k,3))          &
-                     /     rho
-                  vs = abs(block(b)%metric2(i,j,k,2,1) * block(b)%Q(i,j,k,2)           &
-                     +     block(b)%metric2(i,j,k,2,2) * block(b)%Q(i,j,k,3))          &
-                     /     rho
-                  p  = (0.4E0_dp) * (block(b)%Q(i,j,k,4)                               &
-                     -  0.5E0_dp  *  rho * (block(b)%Q(i,j,k,2) * block(b)%Q(i,j,k,2)  &
-                     + block(b)%Q(i,j,k,3) * block(b)%Q(i,j,k,3)) )
-                  if (rho<=0 .or. p<0) &
-                  write(*,*) i,j,k,rho,p
-                  ce = sqrt( 1.4E0_dp * p / rho )
-                  block(b) % dt(i,j,k) = control_CFL / ( us + vs + ce &
-                     * sqrt( block(b)%metric2(i,j,k,1,1) * block(b)%metric2(i,j,k,1,1) &
-                           + block(b)%metric2(i,j,k,1,2) * block(b)%metric2(i,j,k,1,2) &
-                           + block(b)%metric2(i,j,k,2,1) * block(b)%metric2(i,j,k,2,1) &
-                           + block(b)%metric2(i,j,k,2,2) * block(b)%metric2(i,j,k,2,2) &
-                           + 2.d0 * abs( block(b)%metric2(i,j,k,1,1) * block(b)%metric2(i,j,k,2,1) &
-                                       + block(b)%metric2(i,j,k,1,2) * block(b)%metric2(i,j,k,2,2) &
-                                       ) &
-                           ) &
-                     )
+                  rho = block(b) % Q(i,j,k,1)
+                  u = block(b) % Q(i,j,k,2) / rho
+                  v = block(b) % Q(i,j,k,3) / rho
+                  x = block(b) % len_dt(1,i,j,k)
+                  y = block(b) % len_dt(2,i,j,k)
+                  dt = min(x/u,y/v) * control_CFL
+                  block(b) % dt(i,j,k) = dt
                end do
             end do
          end do

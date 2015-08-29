@@ -9,7 +9,7 @@ before moving to unstr:
 navier-stokes equations
 higher order
 timestep calc
-inplicit ??
+implicit ??
 after moving to unstr: 
 parallelization MPI / OpenMP
 multi block

@@ -23,7 +23,7 @@ str.dx: ../stubex
 	@$(FC) $(CFLAGS) $< -o $@
 
 
-run: git.bin str.dx
+run: git.bin
 	@echo 'Running Grid-Adaper on simple Chamber'
 	@$(PRE_CONFIG)
 	@$(PROGRAM) #-debug

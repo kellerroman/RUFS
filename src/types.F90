@@ -52,18 +52,6 @@ type :: tblock
 
    real(kind=dp),allocatable :: schwerpunkt(:,:,:,:)
    
-   real(kind=dp),allocatable :: metric1(:,:,:,:,:)
-   !< CELL Centered METRIKEN (I,J,K,X/Y/Z,I/J/K)
-   !< dx / di @(i,j,k)
-
-   real(kind=dp),allocatable :: metric2(:,:,:,:,:)
-   !< CELL Centered Inversed METRIKEN (I,J,K,I/J/K,X/Y/Z)
-   !< di / dx @(i,j,k)
-   
-   real(kind=dp),allocatable :: Jac (:,:,:)
-   
-   real(kind=dp),allocatable :: JacI (:,:,:)
-   
    real(kind=dp),allocatable :: Edge_Len (:,:,:,:)
    !< Edge Length (I,J,K, EDGE_DIR)
    !< EDGE_DIR: 1 ist in i-Richtung (West&Ost), 2 ist in j-Richtung (Süd&Nord),...
@@ -79,9 +67,7 @@ type :: tblock
    real(kind=dp),allocatable :: Len_dt (:,:,:,:)
    !< Zellenlänge für die Zeitschrittberechnenung ( COORD,I,J,K)
 
-
    real(kind=dp),allocatable :: Area (:,:,:)
-
 
    type(tbc), allocatable    :: face(:)
    !< GIBT BLOCKVERBDINUNG DES BLOCKES AN: (FACE)
